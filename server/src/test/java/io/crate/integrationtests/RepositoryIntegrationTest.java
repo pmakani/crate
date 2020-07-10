@@ -23,7 +23,9 @@
 package io.crate.integrationtests;
 
 import io.crate.action.sql.SQLActionException;
+import io.crate.sql.tree.Except;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.repositories.RepositoryException;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -48,9 +50,9 @@ public class RepositoryIntegrationTest extends SQLTransportIntegrationTest {
     @Test
     public void testDropExistingRepository() throws Exception {
         execute("CREATE REPOSITORY existing_repo TYPE \"fs\" with (location=?, compress=True)",
-            new Object[]{
-                TEMPORARY_FOLDER.newFolder().getAbsolutePath()
-            });
+                new Object[]{
+                    TEMPORARY_FOLDER.newFolder().getAbsolutePath()
+                });
         waitNoPendingTasksOnAll();
         execute("DROP REPOSITORY existing_repo");
         assertThat(response.rowCount(), is(1L));
@@ -64,9 +66,9 @@ public class RepositoryIntegrationTest extends SQLTransportIntegrationTest {
     public void testCreateRepository() throws Throwable {
         String repoLocation = TEMPORARY_FOLDER.newFolder().getAbsolutePath();
         execute("CREATE REPOSITORY \"myRepo\" TYPE \"fs\" with (location=?, compress=True)",
-            new Object[]{
-                repoLocation
-            });
+                new Object[]{
+                    repoLocation
+                });
         waitNoPendingTasksOnAll();
         execute("select * from sys.repositories where name ='myRepo'");
         assertThat(response.rowCount(), is(1L));
@@ -81,13 +83,29 @@ public class RepositoryIntegrationTest extends SQLTransportIntegrationTest {
     public void testCreateExistingRepository() throws Throwable {
         String repoLocation = TEMPORARY_FOLDER.newFolder().getAbsolutePath();
         execute("CREATE REPOSITORY \"myRepo\" TYPE \"fs\" with (location=?, compress=True)",
-            new Object[]{
-                repoLocation
-            });
+                new Object[]{
+                    repoLocation
+                });
         waitNoPendingTasksOnAll();
         expectedException.expect(SQLActionException.class);
         expectedException.expectMessage("Repository 'myRepo' already exists");
         execute("CREATE REPOSITORY \"myRepo\" TYPE \"fs\" with (location=?, compress=True)",
-            new Object[]{repoLocation});
+                new Object[]{repoLocation});
     }
+
+    @Test
+    public void test_unable_to_create_fs_repository() throws Throwable {
+        var file = TEMPORARY_FOLDER.newFolder();
+        // Make sure repository creation fails
+        file.setReadOnly();
+        String repoLocation = file.getAbsolutePath();
+        expectedException.expect(SQLActionException.class);
+        expectedException.expectMessage("[] [myRepo] Unable verify repository, could not access blob container");
+
+        execute("CREATE REPOSITORY \"myRepo\" TYPE \"fs\" with (location=?, compress=True)",
+                new Object[]{
+                    repoLocation
+                });
+    }
+
 }

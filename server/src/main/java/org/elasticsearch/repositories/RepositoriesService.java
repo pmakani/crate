@@ -261,7 +261,6 @@ public class RepositoriesService implements ClusterStateApplier {
                         listener.onResponse(new VerifyResponse(new DiscoveryNode[0], new VerificationFailure[0]));
                     }
                 } catch (Exception e) {
-                    LOGGER.warn(() -> new ParameterizedMessage("failed to verify repository [{}]", repositoryName), e.getCause());
                     listener.onFailure(e);
                 }
             });

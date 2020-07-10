@@ -23,6 +23,7 @@
 package org.elasticsearch.repositories.azure;
 
 import com.sun.net.httpserver.HttpServer;
+import io.crate.action.sql.SQLActionException;
 import io.crate.integrationtests.SQLTransportIntegrationTest;
 import org.elasticsearch.common.network.InetAddresses;
 import org.elasticsearch.plugins.Plugin;
@@ -62,6 +63,17 @@ public class AzureSnapshotIntegrationTest extends SQLTransportIntegrationTest {
     public void tearDown() throws Exception {
         httpServer.stop(1);
         super.tearDown();
+    }
+
+    @Test
+    public void test_unable_to_create_azure_repository() throws Throwable {
+        expectedException.expect(SQLActionException.class);
+        expectedException.expectMessage("[] [r1] Unable verify repository, could not access blob container");
+        execute(
+            "CREATE REPOSITORY r1 TYPE AZURE WITH (container = 'invalid', " +
+            "account = 'devstoreaccount1', " +
+            "key = 'ZGV2c3RvcmVhY2NvdW50MQ=='," +
+            "endpoint_suffix = 'ignored;DefaultEndpointsProtocol=http;BlobEndpoint')");
     }
 
     @Test

@@ -787,8 +787,8 @@ public abstract class BlobStoreRepository extends AbstractLifecycleComponent imp
                 }
                 return seed;
             }
-        } catch (IOException exp) {
-            throw new RepositoryVerificationException(metadata.name(), "path " + basePath() + " is not accessible on master node", exp);
+        } catch (Exception exp) {
+            throw new RepositoryVerificationException(metadata.name(), "Unable verify repository, could not access blob container", exp.getCause());
         }
     }
 
