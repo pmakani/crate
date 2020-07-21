@@ -110,7 +110,7 @@ public final class ReservoirSampler {
         DocTableInfo docTable = (DocTableInfo) table;
         Random random = Randomness.get();
         Metadata metadata = clusterService.state().metadata();
-        CoordinatorTxnCtx coordinatorTxnCtx = CoordinatorTxnCtx.systemTransactionContext();
+        CoordinatorTxnCtx coordinatorTxnCtx = CoordinatorTxnCtx.systemTransactionContext(functions);
         List<Streamer> streamers = Arrays.asList(Symbols.streamerArray(columns));
         List<Engine.Searcher> searchersToRelease = new ArrayList<>();
         CircuitBreaker breaker = circuitBreakerService.getBreaker(HierarchyCircuitBreakerService.QUERY);

@@ -29,20 +29,28 @@ import java.time.Instant;
 public interface TransactionContext {
 
     static TransactionContext of(SessionSettings sessionSettings) {
-        return new StaticTransactionContext(sessionSettings);
+        return of(sessionSettings, null);
+    }
+
+    static TransactionContext of(SessionSettings sessionSettings, Functions functions) {
+        return new StaticTransactionContext(sessionSettings, functions);
     }
 
     Instant currentInstant();
 
     SessionSettings sessionSettings();
 
+    Functions functions();
+
     class StaticTransactionContext implements TransactionContext {
 
         private final SessionSettings sessionSettings;
         private Instant currentInstant;
+        private Functions functions;
 
-        StaticTransactionContext(SessionSettings sessionSettings) {
+        StaticTransactionContext(SessionSettings sessionSettings, Functions functions) {
             this.sessionSettings = sessionSettings;
+            this.functions = functions;
         }
 
         @Override
@@ -56,6 +64,11 @@ public interface TransactionContext {
         @Override
         public SessionSettings sessionSettings() {
             return sessionSettings;
+        }
+
+        @Override
+        public Functions functions() {
+            return functions;
         }
     }
 }

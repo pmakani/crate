@@ -169,7 +169,7 @@ public class Session implements AutoCloseable {
      *              Use {@link #quickExec(String, ResultReceiver, Row)} to use the regular parser
      */
     public void quickExec(String statement, Function<String, Statement> parse, ResultReceiver<?> resultReceiver, Row params) {
-        CoordinatorTxnCtx txnCtx = new CoordinatorTxnCtx(sessionContext);
+        CoordinatorTxnCtx txnCtx = new CoordinatorTxnCtx(sessionContext, planner.functions());
         Statement parsedStmt = parse.apply(statement);
         AnalyzedStatement analyzedStatement = analyzer.analyze(parsedStmt, sessionContext, ParamTypeHints.EMPTY);
         RoutingProvider routingProvider = new RoutingProvider(Randomness.get().nextInt(), planner.getAwarenessAttributes());
@@ -482,7 +482,7 @@ public class Session implements AutoCloseable {
         var jobId = UUID.randomUUID();
         var routingProvider = new RoutingProvider(Randomness.get().nextInt(), planner.getAwarenessAttributes());
         var clusterState = executor.clusterService().state();
-        var txnCtx = new CoordinatorTxnCtx(sessionContext);
+        var txnCtx = new CoordinatorTxnCtx(sessionContext, executor.functions());
         var plannerContext = new PlannerContext(
             clusterState,
             routingProvider,
@@ -563,7 +563,7 @@ public class Session implements AutoCloseable {
         var jobId = UUID.randomUUID();
         var routingProvider = new RoutingProvider(Randomness.get().nextInt(), planner.getAwarenessAttributes());
         var clusterState = executor.clusterService().state();
-        var txnCtx = new CoordinatorTxnCtx(sessionContext);
+        var txnCtx = new CoordinatorTxnCtx(sessionContext, executor.functions());
         var params = new RowN(portal.params().toArray());
         var plannerContext = new PlannerContext(
             clusterState, routingProvider, jobId, executor.functions(), txnCtx, maxRows, params);

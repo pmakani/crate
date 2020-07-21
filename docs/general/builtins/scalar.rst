@@ -2642,6 +2642,34 @@ Example:
     +---------------+
     SELECT 1 row in set (... sec)
 
+.. _pg_function_is_visible:
+
+``pg_function_is_visible``
+--------------------------
+
+The function ``pg_function_is_visible`` returns true for OIDs that refer to a system
+or a user defined function. A function's OID is calculated as a hash over its schema,
+name and argument type list.
+
+
+Returns: ``boolean``
+
+Synopsis::
+
+   pg_function_is_visible(OID)
+
+Example:
+
+::
+
+    cr> select pg_function_is_visible(1963955068) as pg_function_is_visible;
+    +------------------------+
+    | pg_function_is_visible |
+    +------------------------+
+    | TRUE                   |
+    +------------------------+
+    SELECT 1 row in set (... sec)
+
 .. _version:
 
 ``version``

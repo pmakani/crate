@@ -151,7 +151,7 @@ public class DocIndexMetadata {
 
         this.expressionAnalyzer = new ExpressionAnalyzer(
             functions,
-            CoordinatorTxnCtx.systemTransactionContext(),
+            CoordinatorTxnCtx.systemTransactionContext(functions),
             ParamTypeHints.EMPTY,
             FieldProvider.UNSUPPORTED,
             null);
@@ -591,7 +591,7 @@ public class DocIndexMetadata {
         Collection<Reference> references = this.references.values();
         TableReferenceResolver tableReferenceResolver = new TableReferenceResolver(references, ident);
         ExpressionAnalyzer exprAnalyzer = new ExpressionAnalyzer(
-            functions, CoordinatorTxnCtx.systemTransactionContext(), ParamTypeHints.EMPTY, tableReferenceResolver, null);
+            functions, CoordinatorTxnCtx.systemTransactionContext(functions), ParamTypeHints.EMPTY, tableReferenceResolver, null);
         ExpressionAnalysisContext analysisCtx = new ExpressionAnalysisContext();
 
         ImmutableList.Builder<CheckConstraint<Symbol>> checkConstraintsBuilder = null;

@@ -44,7 +44,7 @@ public class EvaluatingNormalizerTest extends ESTestCase {
     private Functions functions;
     private Reference dummyLoadInfo;
 
-    private final CoordinatorTxnCtx coordinatorTxnCtx = new CoordinatorTxnCtx(SessionContext.systemSessionContext());
+    private final CoordinatorTxnCtx coordinatorTxnCtx = new CoordinatorTxnCtx(SessionContext.systemSessionContext(), functions);
 
     @Before
     public void prepare() throws Exception {

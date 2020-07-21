@@ -229,4 +229,9 @@ public class EvaluatingNormalizer {
         }
         return symbol.accept(visitor, txnCtx);
     }
+
+    public Functions functions() {
+        return functions;
+    }
+
 }

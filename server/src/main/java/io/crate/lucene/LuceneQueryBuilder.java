@@ -130,7 +130,7 @@ public class LuceneQueryBuilder {
             indexName,
             table.partitionedByColumns()
         );
-        CoordinatorTxnCtx coordinatorTxnCtx = CoordinatorTxnCtx.systemTransactionContext();
+        CoordinatorTxnCtx coordinatorTxnCtx = CoordinatorTxnCtx.systemTransactionContext(functions);
         ctx.query = eliminateNullsIfPossible(
             inverseSourceLookup(normalizer.normalize(query, coordinatorTxnCtx)),
             s -> normalizer.normalize(s, coordinatorTxnCtx)

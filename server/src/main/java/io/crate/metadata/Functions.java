@@ -30,6 +30,7 @@ import io.crate.expression.symbol.format.Style;
 import io.crate.metadata.functions.BoundVariables;
 import io.crate.metadata.functions.Signature;
 import io.crate.metadata.functions.SignatureBinder;
+import io.crate.metadata.pgcatalog.OidHash;
 import io.crate.types.DataType;
 import io.crate.types.DataTypes;
 import io.crate.types.TypeSignature;
@@ -86,6 +87,22 @@ public class Functions {
     public void deregisterUdfResolversForSchema(String schema) {
         udfFunctionImplementations.keySet()
             .removeIf(function -> schema.equals(function.schema()));
+    }
+
+    private static Signature findSignatureByOid(Map<FunctionName, List<FunctionProvider>> functions, Integer oid) {
+        for (Map.Entry<FunctionName, List<FunctionProvider>> func : functions.entrySet()) {
+            for (FunctionProvider sig : func.getValue()) {
+                if (Objects.equals(oid, OidHash.functionOid(sig.getSignature()))) {
+                    return sig.getSignature();
+                }
+            }
+        }
+        return null;
+    }
+
+    public Signature findFunctionSignatureByOid(Integer oid) {
+        Signature sig = findSignatureByOid(udfFunctionImplementations, oid);
+        return sig != null ? sig : findSignatureByOid(functionImplementations, oid);
     }
 
     /**

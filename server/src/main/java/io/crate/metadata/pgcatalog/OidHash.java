@@ -26,7 +26,11 @@ import io.crate.common.collections.Lists2;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.FunctionName;
 import io.crate.metadata.RelationInfo;
+import io.crate.metadata.functions.Signature;
+import io.crate.types.TypeSignature;
 import org.apache.lucene.util.BytesRef;
+
+import java.util.List;
 
 import static org.apache.lucene.util.StringHelper.murmurhash3_x86_32;
 
@@ -63,12 +67,37 @@ public final class OidHash {
         return murmurhash3_x86_32(b.bytes, b.offset, b.length, 0);
     }
 
-    public static int functionOid(FunctionName functionName) {
-        BytesRef b = new BytesRef(Type.PROC.toString() + functionName.schema() + functionName.name());
+    public static int regprocOid(FunctionName name) {
+        BytesRef b = new BytesRef(Type.PROC.toString() + name.schema() + name.name());
         return murmurhash3_x86_32(b.bytes, b.offset, b.length, 0);
     }
 
-    public static int functionOid(String functionName) {
-        return functionOid(new FunctionName(null, functionName));
+    public static int regprocOid(String name) {
+        return regprocOid(new FunctionName(null, name));
+    }
+
+    public static int functionOid(Signature sig) {
+        FunctionName name = sig.getName();
+        BytesRef b = new BytesRef(
+            new StringBuilder(Type.PROC.toString())
+                .append(name.schema() == null ? "" : name.schema())
+                .append(name.name())
+                .append(argTypesToStr(sig.getArgumentTypes()))
+                .toString());
+        return murmurhash3_x86_32(b.bytes, b.offset, b.length, 0);
+    }
+
+    private static String argTypesToStr(List<TypeSignature> typeSignatures) {
+        return Lists2.joinOn(" ", typeSignatures, typeSignature -> {
+            try {
+                return typeSignature.createType().getName();
+            } catch (IllegalArgumentException i) {
+                // generic signatures, e.g. E, array[E]
+                String baseName = typeSignature.getBaseTypeName();
+                List<TypeSignature> innerTypeSignatures = typeSignature.getParameters();
+                return innerTypeSignatures.isEmpty() ?
+                    "[" + baseName + "]" : baseName + argTypesToStr(innerTypeSignatures);
+            }
+        });
     }
 }

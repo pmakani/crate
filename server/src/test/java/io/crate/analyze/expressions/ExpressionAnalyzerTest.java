@@ -99,7 +99,7 @@ public class ExpressionAnalyzerTest extends CrateDummyClusterServiceUnitTest {
         paramTypeHints = ParamTypeHints.EMPTY;
         DummyRelation dummyRelation = new DummyRelation("obj.x", "myObj.x", "myObj.x.AbC");
         dummySources = Map.of(dummyRelation.relationName(), dummyRelation);
-        coordinatorTxnCtx = CoordinatorTxnCtx.systemTransactionContext();
+        coordinatorTxnCtx = CoordinatorTxnCtx.systemTransactionContext(functions);
         context = new ExpressionAnalysisContext();
         functions = getFunctions();
         executor = SQLExecutor.builder(clusterService)
@@ -259,21 +259,21 @@ public class ExpressionAnalyzerTest extends CrateDummyClusterServiceUnitTest {
             null,
             localContext,
             functions,
-            CoordinatorTxnCtx.systemTransactionContext());
+            CoordinatorTxnCtx.systemTransactionContext(functions));
         Symbol fn2 = ExpressionAnalyzer.allocateFunction(
             functionName,
             List.of(Literal.BOOLEAN_FALSE),
             null,
             localContext,
             functions,
-            CoordinatorTxnCtx.systemTransactionContext());
+            CoordinatorTxnCtx.systemTransactionContext(functions));
         Symbol fn3 = ExpressionAnalyzer.allocateFunction(
             functionName,
             List.of(Literal.BOOLEAN_TRUE),
             null,
             localContext,
             functions,
-            CoordinatorTxnCtx.systemTransactionContext());
+            CoordinatorTxnCtx.systemTransactionContext(functions));
 
         // different instances
         assertThat(fn1, allOf(

@@ -63,9 +63,10 @@ public class InternalViewInfoFactory implements ViewInfoFactory {
         }
         List<Reference> columns;
         try {
-            AnalyzedRelation relation = analyzerProvider.get().analyze(
+            RelationAnalyzer analyzer = analyzerProvider.get();
+            AnalyzedRelation relation = analyzer.analyze(
                 (Query) SqlParser.createStatement(view.stmt()),
-                CoordinatorTxnCtx.systemTransactionContext(),
+                CoordinatorTxnCtx.systemTransactionContext(analyzer.functions()),
                 ParamTypeHints.EMPTY);
             final List<Reference> collectedColumns = new ArrayList<>(relation.outputs().size());
             relation.outputs()

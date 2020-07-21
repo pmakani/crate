@@ -37,14 +37,24 @@ import java.util.Objects;
 public final class CoordinatorTxnCtx implements TransactionContext {
 
     private final SessionContext sessionContext;
+    private final Functions functions;
     private Instant currentInstant;
 
     public static CoordinatorTxnCtx systemTransactionContext() {
-        return new CoordinatorTxnCtx(SessionContext.systemSessionContext());
+        return systemTransactionContext(null);
+    }
+
+    public static CoordinatorTxnCtx systemTransactionContext(Functions functions) {
+        return new CoordinatorTxnCtx(SessionContext.systemSessionContext(), functions);
     }
 
     public CoordinatorTxnCtx(SessionContext sessionContext) {
+        this(sessionContext, null);
+    }
+
+    public CoordinatorTxnCtx(SessionContext sessionContext, Functions functions) {
         this.sessionContext = Objects.requireNonNull(sessionContext);
+        this.functions = functions;
     }
 
     /**
@@ -64,6 +74,11 @@ public final class CoordinatorTxnCtx implements TransactionContext {
         return new SessionSettings(sessionContext.user().name(),
                                    sessionContext.searchPath(),
                                    sessionContext.isHashJoinEnabled());
+    }
+
+    @Override
+    public Functions functions() {
+        return functions;
     }
 
     public SessionContext sessionContext() {

@@ -62,7 +62,7 @@ public class ValueNormalizerTest extends CrateDummyClusterServiceUnitTest {
             valueSymbol,
             reference,
             userTableInfo,
-            s -> normalizer.normalize(s, CoordinatorTxnCtx.systemTransactionContext())
+            s -> normalizer.normalize(s, CoordinatorTxnCtx.systemTransactionContext(normalizer.functions()))
         );
     }
 

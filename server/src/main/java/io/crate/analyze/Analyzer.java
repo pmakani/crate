@@ -134,6 +134,7 @@ public class Analyzer {
     private final KillAnalyzer killAnalyzer;
     private final SetStatementAnalyzer setStatementAnalyzer;
     private final ResetStatementAnalyzer resetStatementAnalyzer;
+    private final Functions functions;
 
     /**
      * @param relationAnalyzer is injected because we also need to inject it in
@@ -150,6 +151,7 @@ public class Analyzer {
                     UserManager userManager,
                     SessionSettingRegistry sessionSettingRegistry
     ) {
+        this.functions = functions;
         this.relationAnalyzer = relationAnalyzer;
         this.dropTableAnalyzer = new DropTableAnalyzer(schemas);
         this.dropCheckConstraintAnalyzer = new DropCheckConstraintAnalyzer(schemas);
@@ -194,7 +196,7 @@ public class Analyzer {
         var analyzedStatement = statement.accept(
             dispatcher,
             new Analysis(
-                new CoordinatorTxnCtx(sessionContext),
+                new CoordinatorTxnCtx(sessionContext, functions),
                 paramTypeHints));
         userManager.getAccessControl(sessionContext).ensureMayExecute(analyzedStatement);
         return analyzedStatement;
