@@ -51,6 +51,8 @@ Breaking Changes
 Changes
 =======
 
+- Added scalar function :ref:`pg_get_function_result <pg_get_function_result>`.
+
 - Added scalar function :ref:`pg_function_is_visible <pg_function_is_visible>`.
 
 - Added table function :ref:`generate_subscripts <table-functions-generate-subscripts>`

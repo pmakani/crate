@@ -30,14 +30,16 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class PgFunctionIsVisibleTest extends AbstractScalarFunctionsTest {
+public class PgGetFunctionResultTest extends AbstractScalarFunctionsTest {
 
     @Test
     public void test_system_function_visibility() {
         for (List<FunctionProvider> providers : functions.functionResolvers().values()) {
             for (FunctionProvider sysFunc : providers) {
                 Signature signature = sysFunc.getSignature();
-                assertEvaluate("pg_function_is_visible(" + OidHash.functionOid(signature) + ")",true);
+                assertEvaluate(
+                    "pg_get_function_result(" + OidHash.functionOid(signature) + ")",
+                    signature.getReturnType().toString());
             }
         }
     }

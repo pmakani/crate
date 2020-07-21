@@ -58,6 +58,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 
 @ESIntegTestCase.ClusterScope(numDataNodes = 2, numClientNodes = 0)
 public class UserDefinedFunctionsIntegrationTest extends SQLTransportIntegrationTest {
@@ -295,5 +296,29 @@ public class UserDefinedFunctionsIntegrationTest extends SQLTransportIntegration
         execute("drop function doc.my_func(array(array(integer)), integer, text)");
         execute("select pg_function_is_visible(" + functionOid + ")");
         assertThat(response.rows()[0][0], is(false));
+    }
+
+    @Test
+    public void test_pg_get_function_result() throws Exception {
+        Signature signature = Signature
+            .builder()
+            .kind(FunctionType.SCALAR)
+            .name(new FunctionName(Schemas.DOC_SCHEMA_NAME, "my_func"))
+            .argumentTypes(
+                TypeSignature.parseTypeSignature("array(array(integer))"),
+                TypeSignature.parseTypeSignature("integer"),
+                TypeSignature.parseTypeSignature("text"))
+            .returnType(TypeSignature.parseTypeSignature("text"))
+            .build();
+        int functionOid = OidHash.functionOid(signature);
+
+        execute("create function doc.my_func(array(array(integer)), integer, text) returns text language dummy_lang as '42'");
+
+        execute("select pg_get_function_result(" + functionOid + ")");
+        assertThat(response.rows()[0][0], is(TypeSignature.parseTypeSignature("text").toString()));
+
+        execute("drop function doc.my_func(array(array(integer)), integer, text)");
+        execute("select pg_get_function_result(" + functionOid + ")");
+        assertThat(response.rows()[0][0], nullValue());
     }
 }
