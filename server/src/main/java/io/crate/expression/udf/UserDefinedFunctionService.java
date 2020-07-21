@@ -26,6 +26,7 @@ import io.crate.common.collections.Lists2;
 import io.crate.common.unit.TimeValue;
 import io.crate.exceptions.UserDefinedFunctionAlreadyExistsException;
 import io.crate.exceptions.UserDefinedFunctionUnknownException;
+import io.crate.expression.AbstractFunctionModule;
 import io.crate.metadata.FunctionProvider;
 import io.crate.metadata.FunctionName;
 import io.crate.metadata.FunctionType;
@@ -108,6 +109,8 @@ public class UserDefinedFunctionService {
 
                 @Override
                 public void clusterStateProcessed(String source, ClusterState oldState, ClusterState newState) {
+                    UserDefinedFunctionsMetadata functions = newState.getMetadata().custom(UserDefinedFunctionsMetadata.TYPE);
+                    functions.functionsMetadata().forEach(AbstractFunctionModule::registerUDFFunction);
                     listener.onResponse(new AcknowledgedResponse(true));
                 }
 
@@ -148,6 +151,8 @@ public class UserDefinedFunctionService {
 
                 @Override
                 public void clusterStateProcessed(String source, ClusterState oldState, ClusterState newState) {
+                    UserDefinedFunctionsMetadata functions = oldState.getMetadata().custom(UserDefinedFunctionsMetadata.TYPE);
+                    functions.functionsMetadata().forEach(AbstractFunctionModule::deregisterUDFFunction);
                     listener.onResponse(new AcknowledgedResponse(true));
                 }
 

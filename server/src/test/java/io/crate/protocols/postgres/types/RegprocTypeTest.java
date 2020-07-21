@@ -43,18 +43,18 @@ public class RegprocTypeTest extends BasePGTypeTest<Regproc> {
     @Test
     public void test_write_binary_value_writes_only_oid() {
         var regproc = Regproc.of(
-            OidHash.functionOid("test"),
-            String.valueOf(OidHash.functionOid("test"))
+            OidHash.regprocOid("test"),
+            String.valueOf(OidHash.regprocOid("test"))
         );
         assertBytesWritten(
             regproc,
-            new byte[]{0, 0, 0, 4, -110, -89, 1, 103},
+            new byte[]{0, 0, 0, 4, 65, 35, 72, 120},
             RegprocType.INSTANCE.typeLen() + INT32_BYTE_SIZE);
     }
 
     @Test
     public void test_read_binary_value_reads_only_oid() {
-        var oid = OidHash.functionOid("func");
+        var oid = OidHash.regprocOid("func");
         var regproc = Regproc.of(oid, String.valueOf(oid));
         assertBytesReadBinary(
             ByteBuffer.allocate(4).putInt(regproc.oid()).array(),

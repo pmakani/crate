@@ -22,6 +22,8 @@
 
 package io.crate.types;
 
+import io.crate.expression.AbstractFunctionModule;
+import io.crate.metadata.functions.Signature;
 import io.crate.metadata.pgcatalog.OidHash;
 
 import javax.annotation.Nonnull;
@@ -33,7 +35,7 @@ public class Regproc {
     private final String name;
 
     public static Regproc of(@Nonnull String name) {
-        return new Regproc(OidHash.functionOid(name), name);
+        return new Regproc(OidHash.regprocOid(name), name);
     }
 
     public static Regproc of(int functionOid, @Nonnull String name) {
@@ -42,7 +44,8 @@ public class Regproc {
         // no match.
         // It looks like for compatibility with clients it is good enough
         // to not mirror this behavior.
-        return new Regproc(functionOid, name);
+        Signature signature = AbstractFunctionModule.getFunctionSignatureByOid(functionOid);
+        return new Regproc(functionOid, signature == null ? name : signature.getName().name());
     }
 
     private Regproc(int functionOid, String name) {

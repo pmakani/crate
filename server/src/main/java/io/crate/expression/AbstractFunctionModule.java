@@ -22,10 +22,14 @@
 
 package io.crate.expression;
 
+import io.crate.expression.udf.UserDefinedFunctionMetadata;
 import io.crate.metadata.FunctionImplementation;
 import io.crate.metadata.FunctionName;
 import io.crate.metadata.FunctionProvider;
+import io.crate.metadata.FunctionType;
 import io.crate.metadata.functions.Signature;
+import io.crate.metadata.pgcatalog.OidHash;
+import io.crate.types.DataType;
 import org.elasticsearch.common.inject.AbstractModule;
 import org.elasticsearch.common.inject.TypeLiteral;
 import org.elasticsearch.common.inject.multibindings.MapBinder;
@@ -34,9 +38,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 public abstract class AbstractFunctionModule<T extends FunctionImplementation> extends AbstractModule {
+
+    private static ConcurrentMap<Integer, Signature> SYSTEM_FUNCTION_SIGNATURES_BY_OID = new ConcurrentHashMap<>();
+    private static ConcurrentMap<Integer, Signature> UDF_FUNCTION_SIGNATURES_BY_OID = new ConcurrentHashMap<>();
 
     private HashMap<FunctionName, List<FunctionProvider>> functionImplementations = new HashMap<>();
     private MapBinder<FunctionName, List<FunctionProvider>> implementationsBinder;
@@ -51,6 +61,36 @@ public abstract class AbstractFunctionModule<T extends FunctionImplementation> e
                 "A function already exists for signature = " + signature);
         }
         functions.add(new FunctionProvider(signature, factory));
+        SYSTEM_FUNCTION_SIGNATURES_BY_OID.put(OidHash.functionOid(signature), signature);
+    }
+
+    public static void registerUDFFunction(UserDefinedFunctionMetadata metadata) {
+        UDF_FUNCTION_SIGNATURES_BY_OID.putIfAbsent(
+            OidHash.functionOid(metadata.schema(), metadata.name(), metadata.argumentTypes()),
+            Signature
+                .builder()
+                .kind(FunctionType.SCALAR)
+                .name(new FunctionName(metadata.schema(), metadata.name()))
+                .argumentTypes(metadata
+                                   .argumentTypes()
+                                   .stream()
+                                   .map(DataType::getTypeSignature)
+                                   .collect(Collectors.toList()))
+                .returnType(metadata.returnType().getTypeSignature())
+                .build());
+    }
+
+    public static void deregisterUDFFunction(UserDefinedFunctionMetadata metadata) {
+        UDF_FUNCTION_SIGNATURES_BY_OID.remove(
+            OidHash.functionOid(metadata.schema(), metadata.name(), metadata.argumentTypes()));
+    }
+
+    public static Signature getFunctionSignatureByOid(Integer functionOid) {
+        if (functionOid == null) {
+            new IllegalArgumentException("function oid cannot be null");
+        }
+        Signature signature = UDF_FUNCTION_SIGNATURES_BY_OID.get(functionOid);
+        return signature == null ? SYSTEM_FUNCTION_SIGNATURES_BY_OID.get(functionOid) : signature;
     }
 
     public abstract void configureFunctions();

@@ -182,11 +182,11 @@ public class PgCatalogITest extends SQLTransportIntegrationTest {
             return cmp == 0 ? ((List<?>) o1[9]).size() - ((List<?>) o2[9]).size() : cmp;
         });
         assertThat(printedTable(response.rows()), is(
-            "-395638146| array_difference| -1861355723| 1000.0| 0| false| false| true| 2277| [2277, 2277]| NULL| array_difference\n" +
-            "726540318| current_timestamp| -1861355723| 0.0| 0| false| false| false| 1184| []| NULL| current_timestamp\n" +
-            "726540318| current_timestamp| -1861355723| 0.0| 0| false| false| false| 1184| [23]| NULL| current_timestamp\n" +
-            "-1602853722| format| -1861355723| 0.0| 2276| false| false| false| 1043| [1043, 2276]| [i, v]| format\n" +
-            "-852341072| least| -1861355723| 0.0| 2276| false| false| false| 2276| [2276]| [v]| least\n"));
+            "-412864631| array_difference| -1861355723| 1000.0| 0| false| false| true| 2277| [2277, 2277]| NULL| array_difference\n" +
+            "550145449| current_timestamp| -1861355723| 0.0| 0| false| false| false| 1184| []| NULL| current_timestamp\n" +
+            "-745990987| current_timestamp| -1861355723| 0.0| 0| false| false| false| 1184| [23]| NULL| current_timestamp\n" +
+            "1950945057| format| -1861355723| 0.0| 2276| false| false| false| 1043| [1043, 2276]| [i, v]| format\n" +
+            "-1141502556| least| -1861355723| 0.0| 2276| false| false| false| 2276| [2276]| [v]| least\n"));
     }
 
     @Test
@@ -195,7 +195,7 @@ public class PgCatalogITest extends SQLTransportIntegrationTest {
             "SELECT typname, typreceive, typreceive::int, typreceive::text " +
             "FROM pg_type " +
             "WHERE typname = 'bool'");
-        assertThat(printedTable(response.rows()), is("bool| boolrecv| 994071801| boolrecv\n"));
+        assertThat(printedTable(response.rows()), is("bool| boolrecv| 1672286694| boolrecv\n"));
     }
 
     @Test
@@ -205,6 +205,6 @@ public class PgCatalogITest extends SQLTransportIntegrationTest {
             "FROM pg_type " +
             "JOIN pg_proc ON pg_proc.oid = pg_type.typreceive " +
             "WHERE pg_type.typname = 'bool'");
-        assertThat(printedTable(response.rows()), is("bool| boolrecv| 994071801\n"));
+        assertThat(printedTable(response.rows()), is("bool| boolrecv| 1672286694\n"));
     }
 }

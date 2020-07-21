@@ -26,7 +26,13 @@ import io.crate.common.collections.Lists2;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.FunctionName;
 import io.crate.metadata.RelationInfo;
+import io.crate.metadata.functions.Signature;
+import io.crate.types.DataType;
+import io.crate.types.TypeSignature;
 import org.apache.lucene.util.BytesRef;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 import static org.apache.lucene.util.StringHelper.murmurhash3_x86_32;
 
@@ -63,12 +69,41 @@ public final class OidHash {
         return murmurhash3_x86_32(b.bytes, b.offset, b.length, 0);
     }
 
-    public static int functionOid(FunctionName functionName) {
-        BytesRef b = new BytesRef(Type.PROC.toString() + functionName.schema() + functionName.name());
+    public static int regprocOid(String typeName) {
+        BytesRef b = new BytesRef(Type.PROC.toString() + typeName);
         return murmurhash3_x86_32(b.bytes, b.offset, b.length, 0);
     }
 
-    public static int functionOid(String functionName) {
-        return functionOid(new FunctionName(null, functionName));
+    public static int functionOid(Signature sig) {
+        FunctionName name = sig.getName();
+        return functionOid(name.schema(), name.name(), argTypesToStr(sig.getArgumentTypes()));
+    }
+
+    public static int functionOid(String schema, String name, List<DataType<?>> argTypes) {
+        return functionOid(schema, name, Lists2.joinOn(" ", argTypes, DataType::getName));
+    }
+
+    private static int functionOid(@Nullable String schema, String name, @Nullable String argTypes) {
+        BytesRef b = new BytesRef(
+            new StringBuilder(Type.PROC.toString())
+                .append(schema == null ? "" : schema)
+                .append(name)
+                .append(argTypes == null ? "" : argTypes)
+                .toString());
+        return murmurhash3_x86_32(b.bytes, b.offset, b.length, 0);
+    }
+
+    private static String argTypesToStr(List<TypeSignature> typeSignatures) {
+        return Lists2.joinOn(" ", typeSignatures, typeSignature -> {
+            try {
+                return typeSignature.createType().getName();
+            } catch (IllegalArgumentException i) {
+                // generic signatures, e.g. E, array[E]
+                String baseName = typeSignature.getBaseTypeName();
+                List<TypeSignature> innerTypeSignatures = typeSignature.getParameters();
+                return innerTypeSignatures.isEmpty() ?
+                    "[" + baseName + "]" : baseName + argTypesToStr(innerTypeSignatures);
+            }
+        });
     }
 }

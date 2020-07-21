@@ -33,11 +33,16 @@ import io.crate.expression.symbol.Symbols;
 import io.crate.expression.udf.UDFLanguage;
 import io.crate.expression.udf.UserDefinedFunctionMetadata;
 import io.crate.expression.udf.UserDefinedFunctionService;
+import io.crate.metadata.FunctionName;
+import io.crate.metadata.FunctionType;
 import io.crate.metadata.Scalar;
+import io.crate.metadata.Schemas;
 import io.crate.metadata.TransactionContext;
 import io.crate.metadata.functions.Signature;
+import io.crate.metadata.pgcatalog.OidHash;
 import io.crate.types.DataType;
 import io.crate.types.DataTypes;
+import io.crate.types.TypeSignature;
 import org.elasticsearch.test.ESIntegTestCase;
 import org.junit.Before;
 import org.junit.Test;
@@ -263,5 +268,32 @@ public class UserDefinedFunctionsIntegrationTest extends SQLTransportIntegration
             name, types.stream().map(DataType::getName).collect(Collectors.joining(", "))));
         assertThat(response.rowCount(), is(1L));
         assertFunctionIsDeletedOnAll(sqlExecutor.getCurrentSchema(), name, arguments);
+    }
+
+    @Test
+    public void test_pg_function_is_visible() throws Exception {
+        Signature signature = Signature
+            .builder()
+            .kind(FunctionType.SCALAR)
+            .name(new FunctionName(Schemas.DOC_SCHEMA_NAME, "my_func"))
+            .argumentTypes(
+                TypeSignature.parseTypeSignature("array(array(integer))"),
+                TypeSignature.parseTypeSignature("integer"),
+                TypeSignature.parseTypeSignature("text"))
+            .returnType(TypeSignature.parseTypeSignature("text"))
+            .build();
+        int functionOid = OidHash.functionOid(signature);
+
+        execute("select pg_function_is_visible(" + functionOid + ")");
+        assertThat(response.rows()[0][0], is(false));
+
+        execute("create function doc.my_func(array(array(integer)), integer, text) returns text language dummy_lang as '42'");
+
+        execute("select pg_function_is_visible(" + functionOid + ")");
+        assertThat(response.rows()[0][0], is(true));
+
+        execute("drop function doc.my_func(array(array(integer)), integer, text)");
+        execute("select pg_function_is_visible(" + functionOid + ")");
+        assertThat(response.rows()[0][0], is(false));
     }
 }
