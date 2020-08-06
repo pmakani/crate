@@ -22,15 +22,18 @@
 
 package io.crate.metadata.pgcatalog;
 
+import io.crate.common.annotations.VisibleForTesting;
 import io.crate.common.collections.Lists2;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.FunctionName;
 import io.crate.metadata.RelationInfo;
 import io.crate.metadata.functions.Signature;
 import io.crate.types.TypeSignature;
-import org.apache.lucene.util.BytesRef;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.apache.lucene.util.StringHelper.murmurhash3_x86_32;
 
@@ -45,58 +48,54 @@ public final class OidHash {
         PROC
     }
 
+    private static int oid(String... keys) {
+        byte [] b = Lists2
+            .joinOn("", Arrays.asList(keys), Function.identity())
+            .getBytes(StandardCharsets.UTF_8);
+        return murmurhash3_x86_32(b, 0, b.length, 0);
+    }
+
     public static int relationOid(RelationInfo relationInfo) {
         Type t = relationInfo.relationType() == RelationInfo.RelationType.VIEW ? Type.VIEW : Type.TABLE;
-        BytesRef b = new BytesRef(t.toString() + relationInfo.ident().fqn());
-        return murmurhash3_x86_32(b.bytes, b.offset, b.length, 0);
+        return oid(t.toString(), relationInfo.ident().fqn());
     }
 
     public static int schemaOid(String name) {
-        BytesRef b = new BytesRef(Type.SCHEMA.toString() + name);
-        return murmurhash3_x86_32(b.bytes, b.offset, b.length, 0);
+        return oid(Type.SCHEMA.toString(), name);
     }
 
     public static int primaryKeyOid(RelationInfo relationInfo) {
         var primaryKey = Lists2.joinOn(" ", relationInfo.primaryKey(), ColumnIdent::name);
-        var b = new BytesRef(Type.PRIMARY_KEY.toString() + relationInfo.ident().fqn() + primaryKey);
-        return murmurhash3_x86_32(b.bytes, b.offset, b.length, 0);
+        return oid(Type.PRIMARY_KEY.toString(), relationInfo.ident().fqn(), primaryKey);
     }
 
-    static int constraintOid(String relationName, String constraintName, String constraintType) {
-        BytesRef b = new BytesRef(Type.CONSTRAINT.toString() + relationName + constraintName + constraintType);
-        return murmurhash3_x86_32(b.bytes, b.offset, b.length, 0);
+    public static int constraintOid(String relationName, String constraintName, String constraintType) {
+        return oid(Type.CONSTRAINT.toString(), relationName, constraintName, constraintType);
     }
 
     public static int regprocOid(FunctionName name) {
-        BytesRef b = new BytesRef(Type.PROC.toString() + name.schema() + name.name());
-        return murmurhash3_x86_32(b.bytes, b.offset, b.length, 0);
+        return oid(Type.PROC.toString(), name.schema(), name.name());
     }
 
     public static int regprocOid(String name) {
-        return regprocOid(new FunctionName(null, name));
+        return oid(Type.PROC.toString(), null, name);
     }
 
     public static int functionOid(Signature sig) {
         FunctionName name = sig.getName();
-        BytesRef b = new BytesRef(
-            new StringBuilder(Type.PROC.toString())
-                .append(name.schema() == null ? "" : name.schema())
-                .append(name.name())
-                .append(argTypesToStr(sig.getArgumentTypes()))
-                .toString());
-        return murmurhash3_x86_32(b.bytes, b.offset, b.length, 0);
+        return oid(Type.PROC.toString(), name.schema(), name.name(), argTypesToStr(sig.getArgumentTypes()));
     }
 
-    private static String argTypesToStr(List<TypeSignature> typeSignatures) {
-        return Lists2.joinOn(" ", typeSignatures, typeSignature -> {
+    @VisibleForTesting
+    static String argTypesToStr(List<TypeSignature> typeSignatures) {
+        return Lists2.joinOn(" ", typeSignatures, ts -> {
             try {
-                return typeSignature.createType().getName();
+                return ts.createType().getName();
             } catch (IllegalArgumentException i) {
-                // generic signatures, e.g. E, array[E]
-                String baseName = typeSignature.getBaseTypeName();
-                List<TypeSignature> innerTypeSignatures = typeSignature.getParameters();
-                return innerTypeSignatures.isEmpty() ?
-                    "[" + baseName + "]" : baseName + argTypesToStr(innerTypeSignatures);
+                // generic signatures, e.g. E, array(E)
+                String baseName = ts.getBaseTypeName();
+                List<TypeSignature> innerTs = ts.getParameters();
+                return baseName + (innerTs.isEmpty() ? "" : "_" + argTypesToStr(innerTs));
             }
         });
     }

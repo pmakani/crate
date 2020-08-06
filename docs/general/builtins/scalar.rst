@@ -2662,7 +2662,7 @@ Example:
 
 ::
 
-    cr> select pg_function_is_visible(1963955068) as pg_function_is_visible;
+    cr> select pg_function_is_visible(-919555782) as pg_function_is_visible;
     +------------------------+
     | pg_function_is_visible |
     +------------------------+
