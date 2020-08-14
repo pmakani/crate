@@ -26,15 +26,27 @@ import io.crate.breaker.SizeEstimator;
 import io.crate.breaker.SizeEstimatorFactory;
 import io.crate.data.Input;
 import io.crate.execution.engine.aggregation.AggregationFunction;
+import io.crate.execution.engine.aggregation.DocValueAggregator;
 import io.crate.memory.MemoryManager;
 import io.crate.metadata.functions.Signature;
 import io.crate.types.ArrayType;
+import io.crate.types.ByteType;
 import io.crate.types.DataType;
 import io.crate.types.DataTypes;
+import io.crate.types.DoubleType;
+import io.crate.types.FloatType;
+import io.crate.types.IntegerType;
+import io.crate.types.IpType;
+import io.crate.types.LongType;
+import io.crate.types.ShortType;
+import io.crate.types.StringType;
+import io.crate.types.TimestampType;
 import io.crate.types.UncheckedObjectType;
+import org.apache.lucene.util.NumericUtils;
 import org.apache.lucene.util.RamUsageEstimator;
 import org.elasticsearch.Version;
 import org.elasticsearch.common.breaker.CircuitBreakingException;
+import org.elasticsearch.index.mapper.MappedFieldType;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -287,6 +299,56 @@ public class CollectSetAggregation extends AggregationFunction<Map<Object, Objec
         @Override
         public Signature boundSignature() {
             return boundSignature;
+        }
+    }
+
+    @Override
+    public DocValueAggregator<?> getDocValueAggregator(List<DataType<?>> argumentTypes,
+                                                       List<MappedFieldType> fieldTypes) {
+        var dataType = argumentTypes.get(0);
+        switch (dataType.id()) {
+            case ByteType.ID:
+            case ShortType.ID:
+            case IntegerType.ID:
+            case LongType.ID:
+            case TimestampType.ID_WITH_TZ:
+            case TimestampType.ID_WITHOUT_TZ:
+                return new SortedNumericDocValueAggregator<>(
+                    fieldTypes.get(0).name(),
+                    HashMap::new,
+                    (values, state) ->
+                        state.put(dataType.sanitizeValue(values.nextValue()), PRESENT)
+                );
+            case FloatType.ID:
+                return new SortedNumericDocValueAggregator<>(
+                    fieldTypes.get(0).name(),
+                    HashMap::new,
+                    (values, state) -> {
+                        var value = NumericUtils.sortableIntToFloat((int) values.nextValue());
+                        state.put(value, PRESENT);
+                    }
+                );
+            case DoubleType.ID:
+                return new SortedNumericDocValueAggregator<>(
+                    fieldTypes.get(0).name(),
+                    HashMap::new,
+                    (values, state) -> {
+                        var value = NumericUtils.sortableLongToDouble(values.nextValue());
+                        state.put(value, PRESENT);
+                    }
+                );
+            case IpType.ID:
+            case StringType.ID:
+                return new BinaryDocValueAggregator<>(
+                    fieldTypes.get(0).name(),
+                    HashMap::new,
+                    (values, state) -> {
+                        var value = values.nextValue().utf8ToString();
+                        state.put(dataType.sanitizeValue(value), PRESENT);
+                    }
+                );
+            default:
+                return null;
         }
     }
 }
