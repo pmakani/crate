@@ -36,9 +36,9 @@ public class SortedNumericDocValueAggregator<T> implements DocValueAggregator<T>
 
     private final String columnName;
     private final Supplier<T> stateInitializer;
-    private final CheckedBiConsumer<SortedNumericDocValues, T, IOException> docValuesConsumer;
+    protected final CheckedBiConsumer<SortedNumericDocValues, T, IOException> docValuesConsumer;
 
-    private SortedNumericDocValues values;
+    protected SortedNumericDocValues values;
 
     public SortedNumericDocValueAggregator(String columnName,
                                            Supplier<T> stateInitializer,
