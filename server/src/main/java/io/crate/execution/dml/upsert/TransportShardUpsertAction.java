@@ -131,7 +131,7 @@ public class TransportShardUpsertAction extends TransportShardAction<ShardUpsert
             ? GeneratedColumns.Validation.VALUE_MATCH
             : GeneratedColumns.Validation.NONE;
 
-        TransactionContext txnCtx = TransactionContext.of(request.sessionSettings(), functions);
+        TransactionContext txnCtx = TransactionContext.of(request.sessionSettings());
         InsertSourceGen insertSourceGen = insertColumns == null
             ? null
             : InsertSourceGen.of(txnCtx, functions, tableInfo, indexName, valueValidation, Arrays.asList(insertColumns));

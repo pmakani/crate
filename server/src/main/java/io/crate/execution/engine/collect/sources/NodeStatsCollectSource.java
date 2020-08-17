@@ -113,7 +113,7 @@ public class NodeStatsCollectSource implements CollectSource {
             NodeStatsContext statsContext = new NodeStatsContext(nodeId, node.getName());
             nameExpr.setNextRow(statsContext);
             idExpr.setNextRow(statsContext);
-            Symbol normalized = normalizer.normalize(predicate, CoordinatorTxnCtx.systemTransactionContext(functions));
+            Symbol normalized = normalizer.normalize(predicate, CoordinatorTxnCtx.systemTransactionContext());
             if (normalized.equals(predicate)) {
                 return nodes; // No local available sys nodes columns in where clause
             }

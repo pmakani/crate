@@ -767,8 +767,4 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
         context.endRelation();
         return relation;
     }
-
-    public Functions functions() {
-        return functions;
-    }
 }

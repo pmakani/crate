@@ -172,7 +172,7 @@ public class JobsLogService extends AbstractLifecycleComponent implements Provid
         var jobsLogTable = SysJobsLogTableInfo.create(localNode);
         this.refResolver = new StaticTableReferenceResolver<>(jobsLogTable.expressions());
         TableRelation sysJobsLogRelation = new TableRelation(jobsLogTable);
-        systemTransactionCtx = CoordinatorTxnCtx.systemTransactionContext(functions);
+        systemTransactionCtx = CoordinatorTxnCtx.systemTransactionContext();
         this.expressionAnalyzer = new ExpressionAnalyzer(
             functions,
             systemTransactionCtx,

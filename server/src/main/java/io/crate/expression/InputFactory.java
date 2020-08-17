@@ -108,10 +108,6 @@ public class InputFactory {
             new AggregationVisitor(txnCtx, functions, expressions, aggregationContexts));
     }
 
-    public Functions functions() {
-        return functions;
-    }
-
     public static class Context<T extends Input<?>> {
 
         private final List<Input<?>> topLevelInputs = new ArrayList<>();

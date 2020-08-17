@@ -201,7 +201,7 @@ public class SQLExecutor {
             new RoutingProvider(random.nextInt(), emptyList()),
             UUID.randomUUID(),
             functions,
-            new CoordinatorTxnCtx(sessionContext, functions),
+            new CoordinatorTxnCtx(sessionContext),
             -1,
             null
         );
@@ -441,7 +441,7 @@ public class SQLExecutor {
 
         public Builder addPartitionedTable(String createTableStmt, String... partitions) throws IOException {
             CreateTable<Expression> stmt = (CreateTable<Expression>) SqlParser.createStatement(createTableStmt);
-            CoordinatorTxnCtx txnCtx = new CoordinatorTxnCtx(SessionContext.systemSessionContext(), functions);
+            CoordinatorTxnCtx txnCtx = new CoordinatorTxnCtx(SessionContext.systemSessionContext());
             AnalyzedCreateTable analyzedCreateTable = createTableStatementAnalyzer.analyze(
                 stmt, ParamTypeHints.EMPTY, txnCtx);
 
@@ -500,7 +500,7 @@ public class SQLExecutor {
          */
         public Builder addTable(String createTableStmt) throws IOException {
             CreateTable<Expression> stmt = (CreateTable<Expression>) SqlParser.createStatement(createTableStmt);
-            CoordinatorTxnCtx txnCtx = new CoordinatorTxnCtx(SessionContext.systemSessionContext(), functions);
+            CoordinatorTxnCtx txnCtx = new CoordinatorTxnCtx(SessionContext.systemSessionContext());
             AnalyzedCreateTable analyzedCreateTable = createTableStatementAnalyzer.analyze(
                 stmt, ParamTypeHints.EMPTY, txnCtx);
             BoundCreateTable analyzedStmt = CreateTablePlan.bind(
@@ -578,7 +578,7 @@ public class SQLExecutor {
 
         public Builder addBlobTable(String createBlobTableStmt) throws IOException {
             CreateBlobTable<Expression> stmt = (CreateBlobTable<Expression>) SqlParser.createStatement(createBlobTableStmt);
-            CoordinatorTxnCtx txnCtx = new CoordinatorTxnCtx(SessionContext.systemSessionContext(), functions);
+            CoordinatorTxnCtx txnCtx = new CoordinatorTxnCtx(SessionContext.systemSessionContext());
             AnalyzedCreateBlobTable analyzedStmt = createBlobTableAnalyzer.analyze(
                 stmt, ParamTypeHints.EMPTY, txnCtx);
             Settings settings = CreateBlobTablePlan.buildSettings(
@@ -674,7 +674,7 @@ public class SQLExecutor {
         this.planner = planner;
         this.relAnalyzer = relAnalyzer;
         this.sessionContext = sessionContext;
-        this.coordinatorTxnCtx = new CoordinatorTxnCtx(sessionContext, functions);
+        this.coordinatorTxnCtx = new CoordinatorTxnCtx(sessionContext);
         this.schemas = schemas;
         this.random = random;
         this.fulltextAnalyzerResolver = fulltextAnalyzerResolver;
@@ -714,7 +714,7 @@ public class SQLExecutor {
                 }
             }
         }
-        CoordinatorTxnCtx coordinatorTxnCtx = new CoordinatorTxnCtx(sessionContext, functions);
+        CoordinatorTxnCtx coordinatorTxnCtx = new CoordinatorTxnCtx(sessionContext);
         ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
             functions,
             coordinatorTxnCtx,

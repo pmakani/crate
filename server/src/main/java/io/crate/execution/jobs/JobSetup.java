@@ -195,7 +195,6 @@ public class JobSetup {
         Context context = new Context(
             clusterService.localNode().getId(),
             sessionInfo,
-            inputFactory.functions(),
             contextBuilder,
             LOGGER,
             distributingConsumerFactory,
@@ -220,7 +219,6 @@ public class JobSetup {
         Context context = new Context(
             clusterService.localNode().getId(),
             sessionInfo,
-            inputFactory.functions(),
             taskBuilder,
             LOGGER,
             distributingConsumerFactory,
@@ -460,7 +458,6 @@ public class JobSetup {
 
         Context(String localNodeId,
                 SessionSettings sessionInfo,
-                Functions functions,
                 RootTask.Builder taskBuilder,
                 Logger logger,
                 DistributingConsumerFactory distributingConsumerFactory,
@@ -471,7 +468,7 @@ public class JobSetup {
             this.opCtx = new NodeOperationCtx(localNodeId, nodeOperations);
             this.distributingConsumerFactory = distributingConsumerFactory;
             this.sharedShardContexts = sharedShardContexts;
-            this.transactionContext = TransactionContext.of(sessionInfo, functions);
+            this.transactionContext = TransactionContext.of(sessionInfo);
         }
 
         public UUID jobId() {

@@ -99,7 +99,7 @@ public final class Assignments {
                 binder.apply(sources[i]),
                 targetColumns[i],
                 tableInfo,
-                s -> normalizer.normalize(s, CoordinatorTxnCtx.systemTransactionContext(normalizer.functions()))
+                s -> normalizer.normalize(s, CoordinatorTxnCtx.systemTransactionContext())
             );
             if (source instanceof Input) {
                 ConstraintsValidator.validate(
