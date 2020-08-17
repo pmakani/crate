@@ -52,7 +52,7 @@ public class RandomFunctionTest extends AbstractScalarFunctionsTest {
 
     @Test
     public void testEvaluateRandom() {
-        assertThat(random.evaluate(txnCtx, new Input[0]),
+        assertThat(random.evaluate(txnCtx, null, new Input[0]),
             is(allOf(greaterThanOrEqualTo(0.0), lessThan(1.0))));
     }
 

@@ -25,6 +25,7 @@ import io.crate.data.Input;
 import io.crate.expression.symbol.Function;
 import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.Symbol;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Scalar;
 import io.crate.metadata.TransactionContext;
 import io.crate.metadata.functions.Signature;
@@ -155,7 +156,7 @@ public class SubscriptFunction extends Scalar<Object, Object[]> {
     }
 
     @Override
-    public Object evaluate(TransactionContext txnCtx, Input[] args) {
+    public Object evaluate(TransactionContext txnCtx, NodeContext nodeCtx, Input[] args) {
         assert args.length == 2 : "invalid number of arguments";
         Object element = args[0].value();
         Object index = args[1].value();

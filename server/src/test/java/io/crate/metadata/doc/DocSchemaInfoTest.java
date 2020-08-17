@@ -28,6 +28,7 @@ import io.crate.expression.udf.UserDefinedFunctionMetadata;
 import io.crate.expression.udf.UserDefinedFunctionService;
 import io.crate.expression.udf.UserDefinedFunctionsMetadata;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Scalar;
 import io.crate.metadata.TransactionContext;
 import io.crate.metadata.functions.Signature;
@@ -68,7 +69,7 @@ public class DocSchemaInfoTest extends CrateDummyClusterServiceUnitTest {
                 }
                 return new Scalar<>() {
                     @Override
-                    public Object evaluate(TransactionContext txnCtx, Input[] args) {
+                    public Object evaluate(TransactionContext txnCtx, NodeContext nodeCtx, Input[] args) {
                         return null;
                     }
 

@@ -29,6 +29,7 @@ import io.crate.data.Row1;
 import io.crate.expression.symbol.format.Style;
 import io.crate.metadata.FunctionImplementation;
 import io.crate.metadata.FunctionInfo;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Scalar;
 import io.crate.metadata.TransactionContext;
 import io.crate.metadata.functions.Signature;
@@ -108,8 +109,8 @@ public class TableFunctionFactory {
         }
 
         @Override
-        public Iterable<Row> evaluate(TransactionContext txnCtx, Input<T>[] args) {
-            return List.of(new Row1(functionImplementation.evaluate(txnCtx, args)));
+        public Iterable<Row> evaluate(TransactionContext txnCtx, NodeContext nodeCtx, Input<T>[] args) {
+            return List.of(new Row1(functionImplementation.evaluate(txnCtx, nodeCtx, args)));
         }
 
         @Override

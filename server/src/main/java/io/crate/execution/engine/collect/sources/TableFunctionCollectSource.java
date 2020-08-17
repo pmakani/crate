@@ -88,7 +88,7 @@ public class TableFunctionCollectSource implements CollectSource {
             topLevelInputs.add(ctx.add(symbol));
         }
 
-        Iterable<Row> result = functionImplementation.evaluate(txnCtx, inputs.toArray(new Input[0]));
+        Iterable<Row> result = functionImplementation.evaluate(txnCtx, null, inputs.toArray(new Input[0]));
         Iterable<Row> rows = Iterables.transform(
             result,
             new ValueAndInputRow<>(topLevelInputs, ctx.expressions()));

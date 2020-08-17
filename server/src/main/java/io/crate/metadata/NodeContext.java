@@ -20,37 +20,27 @@
  * agreement.
  */
 
-package io.crate.expression;
+package io.crate.metadata;
 
-import io.crate.data.Input;
-import io.crate.metadata.TransactionContext;
-import io.crate.metadata.Scalar;
+public interface NodeContext {
 
-import java.util.Arrays;
-
-public final class FunctionExpression<ReturnType, InputType> implements Input<ReturnType> {
-
-    private final Input<InputType>[] arguments;
-    private final Scalar<ReturnType, InputType> scalar;
-    private final TransactionContext txnCtx;
-
-    public FunctionExpression(TransactionContext txnCtx,
-                              Scalar<ReturnType, InputType> scalar,
-                              Input<InputType>[] arguments) {
-        this.txnCtx = txnCtx;
-        this.scalar = scalar;
-        this.arguments = arguments;
+    static NodeContext of(Functions functions) {
+        return new StaticNodeContext(functions);
     }
 
-    @Override
-    public ReturnType value() {
-        return scalar.evaluate(txnCtx, null, arguments);
-    }
+    Functions functions();
 
-    @Override
-    public String toString() {
-        return "FuncExpr{" +
-               scalar.signature().getName() +
-               ", args=" + Arrays.toString(arguments) + '}';
+    class StaticNodeContext implements NodeContext {
+
+        private final Functions functions;
+
+        StaticNodeContext(Functions functions) {
+            this.functions = functions;
+        }
+
+        @Override
+        public Functions functions() {
+            return functions;
+        }
     }
 }

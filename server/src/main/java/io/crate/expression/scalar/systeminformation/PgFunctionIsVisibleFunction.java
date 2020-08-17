@@ -24,6 +24,7 @@ package io.crate.expression.scalar.systeminformation;
 
 import io.crate.data.Input;
 import io.crate.expression.scalar.ScalarFunctionModule;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Scalar;
 import io.crate.metadata.TransactionContext;
 import io.crate.metadata.functions.Signature;
@@ -63,12 +64,12 @@ public final class PgFunctionIsVisibleFunction extends Scalar<Boolean, Integer> 
     }
 
     @Override
-    public Boolean evaluate(TransactionContext txnCtx, Input<Integer>... args) {
+    public Boolean evaluate(TransactionContext txnCtx, NodeContext nodeCtx, Input<Integer>... args) {
         assert args.length == 1 : NAME + " expects exactly 1 argument, got " + args.length;
         Integer oid = args[0].value();
         if (oid == null) {
             return null;
         }
-        return true; // txnCtx.functions().findFunctionSignatureByOid(oid) != null;
+        return nodeCtx.functions().findFunctionSignatureByOid(oid) != null;
     }
 }

@@ -100,6 +100,7 @@ public abstract class AbstractTableFunctionsTest extends ESTestCase {
         //noinspection unchecked,rawtypes
         return functionImplementation.evaluate(
             txnCtx,
+            null,
             function.arguments().stream().map(a -> (Input) a).toArray(Input[]::new));
     }
 

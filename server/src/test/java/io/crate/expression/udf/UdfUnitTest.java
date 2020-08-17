@@ -23,6 +23,7 @@
 package io.crate.expression.udf;
 
 import io.crate.data.Input;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Scalar;
 import io.crate.metadata.TransactionContext;
 import io.crate.metadata.functions.Signature;
@@ -79,7 +80,7 @@ public abstract class UdfUnitTest extends CrateDummyClusterServiceUnitTest {
         }
 
         @Override
-        public Integer evaluate(TransactionContext txnCtx, Input<Integer>[] args) {
+        public Integer evaluate(TransactionContext txnCtx, NodeContext nodeCtx, Input<Integer>[] args) {
             return RESULT;
         }
     }

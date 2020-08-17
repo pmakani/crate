@@ -61,6 +61,7 @@ import io.crate.expression.symbol.Assignments;
 import io.crate.expression.symbol.SelectSymbol;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.IndexParts;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.doc.DocTableInfo;
 import io.crate.metadata.table.Operation;
@@ -528,6 +529,7 @@ public class InsertFromValues implements LogicalPlan {
         //noinspection unchecked
         Iterable<Row> rows = funcImplementation.evaluate(
             plannerContext.transactionContext(),
+            NodeContext.of(plannerContext.functions()),
             boundArguments.toArray(new Input[0]));
 
         return StreamSupport.stream(rows.spliterator(), false)

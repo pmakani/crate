@@ -21,7 +21,6 @@
 
 package io.crate.expression.scalar;
 
-import io.crate.analyze.expressions.ExpressionAnalyzer;
 import io.crate.analyze.relations.AnalyzedRelation;
 import io.crate.analyze.relations.DocTableRelation;
 import io.crate.common.collections.Lists2;
@@ -155,8 +154,8 @@ public abstract class AbstractScalarFunctionsTest extends CrateDummyClusterServi
                 inputs[i] = ((Input) function.arguments().get(i));
             }
             Object expectedValue = ((Input) normalized).value();
-            assertThat(((Scalar) impl).evaluate(txnCtx, inputs), is(expectedValue));
-            assertThat(((Scalar) impl).compile(function.arguments()).evaluate(txnCtx, inputs), is(expectedValue));
+            assertThat(((Scalar) impl).evaluate(txnCtx, null, inputs), is(expectedValue));
+            assertThat(((Scalar) impl).compile(function.arguments()).evaluate(txnCtx, null, inputs), is(expectedValue));
         }
     }
 
@@ -200,7 +199,7 @@ public abstract class AbstractScalarFunctionsTest extends CrateDummyClusterServi
             Input<?> input = ctx.add(arg);
             arguments[i] = new AssertMax1ValueCallInput(input);
         }
-        Object actualValue = scalar.compile(function.arguments()).evaluate(txnCtx, (Input[]) arguments);
+        Object actualValue = scalar.compile(function.arguments()).evaluate(txnCtx, null, (Input[]) arguments);
         assertThat((T) actualValue, expectedValue);
 
         // Reset calls
@@ -208,7 +207,7 @@ public abstract class AbstractScalarFunctionsTest extends CrateDummyClusterServi
             argument.calls = 0;
         }
 
-        actualValue = scalar.evaluate(txnCtx, arguments);
+        actualValue = scalar.evaluate(txnCtx, null, arguments);
         assertThat((T) actualValue, expectedValue);
     }
 
