@@ -34,6 +34,7 @@ import io.crate.execution.support.OneRowActionListener;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.planner.DependencyCarrier;
 import io.crate.planner.Plan;
 import io.crate.planner.PlannerContext;
@@ -91,7 +92,7 @@ public class KillPlan implements Plan {
                     DataTypes.STRING.sanitizeValue(
                         SymbolEvaluator.evaluate(
                             txnCtx,
-                            functions,
+                            new NodeContext(functions),
                             jobId,
                             parameters,
                             subQueryResults

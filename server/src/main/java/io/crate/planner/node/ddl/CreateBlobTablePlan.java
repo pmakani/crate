@@ -36,6 +36,7 @@ import io.crate.execution.support.OneRowActionListener;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.RelationName;
 import io.crate.planner.DependencyCarrier;
 import io.crate.planner.Plan;
@@ -100,7 +101,7 @@ public class CreateBlobTablePlan implements Plan {
                                          NumberOfShards numberOfShards) {
         Function<? super Symbol, Object> eval = x -> SymbolEvaluator.evaluate(
             txnCtx,
-            functions,
+            new NodeContext(functions),
             x,
             params,
             subQueryResults

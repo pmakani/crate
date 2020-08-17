@@ -144,8 +144,8 @@ public class SubscriptFunction extends Scalar<Object, Object[]> {
     }
 
     @Override
-    public Symbol normalizeSymbol(Function func, TransactionContext txnCtx) {
-        Symbol result = evaluateIfLiterals(this, txnCtx, func);
+    public Symbol normalizeSymbol(Function func, TransactionContext txnCtx, NodeContext nodeCtx) {
+        Symbol result = evaluateIfLiterals(this, txnCtx, nodeCtx, func);
         if (result instanceof Literal) {
             return result;
         }

@@ -88,7 +88,7 @@ public class IntersectsFunction extends Scalar<Boolean, Object> {
     }
 
     @Override
-    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx) {
+    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx, NodeContext nodeCtx) {
         Symbol left = symbol.arguments().get(0);
         Symbol right = symbol.arguments().get(1);
         int numLiterals = 0;
@@ -102,7 +102,7 @@ public class IntersectsFunction extends Scalar<Boolean, Object> {
         }
 
         if (numLiterals == 2) {
-            return Literal.of(evaluate(txnCtx, null, (Input) left, (Input) right));
+            return Literal.of(evaluate(txnCtx, nodeCtx, (Input) left, (Input) right));
         }
 
         return symbol;

@@ -28,6 +28,7 @@ import io.crate.exceptions.RelationAlreadyExists;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.Schemas;
 import io.crate.sql.tree.CreateBlobTable;
@@ -46,8 +47,9 @@ public class CreateBlobTableAnalyzer {
     public AnalyzedCreateBlobTable analyze(CreateBlobTable<Expression> node,
                                            ParamTypeHints paramTypeHints,
                                            CoordinatorTxnCtx txnCtx) {
+        var nodeCtx = new NodeContext(functions);
         var exprAnalyzerWithoutFields = new ExpressionAnalyzer(
-            functions, txnCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
+            txnCtx, nodeCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
         var exprCtx = new ExpressionAnalysisContext();
 
         CreateBlobTable<Symbol> createBlobTable = node.map(x -> exprAnalyzerWithoutFields.convert(x, exprCtx));

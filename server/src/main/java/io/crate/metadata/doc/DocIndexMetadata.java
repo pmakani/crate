@@ -43,6 +43,7 @@ import io.crate.metadata.Functions;
 import io.crate.metadata.GeneratedReference;
 import io.crate.metadata.GeoReference;
 import io.crate.metadata.IndexReference;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.ReferenceIdent;
 import io.crate.metadata.RelationName;
@@ -150,8 +151,8 @@ public class DocIndexMetadata {
         closed = state == IndexMetadata.State.CLOSE;
 
         this.expressionAnalyzer = new ExpressionAnalyzer(
-            functions,
             CoordinatorTxnCtx.systemTransactionContext(),
+            new NodeContext(functions),
             ParamTypeHints.EMPTY,
             FieldProvider.UNSUPPORTED,
             null);
@@ -591,7 +592,7 @@ public class DocIndexMetadata {
         Collection<Reference> references = this.references.values();
         TableReferenceResolver tableReferenceResolver = new TableReferenceResolver(references, ident);
         ExpressionAnalyzer exprAnalyzer = new ExpressionAnalyzer(
-            functions, CoordinatorTxnCtx.systemTransactionContext(), ParamTypeHints.EMPTY, tableReferenceResolver, null);
+            CoordinatorTxnCtx.systemTransactionContext(), new NodeContext(functions), ParamTypeHints.EMPTY, tableReferenceResolver, null);
         ExpressionAnalysisContext analysisCtx = new ExpressionAnalysisContext();
 
         ImmutableList.Builder<CheckConstraint<Symbol>> checkConstraintsBuilder = null;

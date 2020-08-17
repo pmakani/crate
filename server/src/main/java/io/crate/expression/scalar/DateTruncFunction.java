@@ -136,7 +136,7 @@ public class DateTruncFunction extends Scalar<Long, Object> {
     }
 
     @Override
-    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx) {
+    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx, NodeContext nodeCtx) {
         assert symbol.arguments().size() > 1 && symbol.arguments().size() < 4 : "Invalid number of arguments";
 
         if (anyNonLiterals(symbol.arguments())) {
@@ -157,7 +157,7 @@ public class DateTruncFunction extends Scalar<Long, Object> {
 
         return Literal.of(
             DataTypes.TIMESTAMPZ,
-            evaluate(txnCtx, null, new Input[]{interval, timezone, tsSymbol})
+            evaluate(txnCtx, nodeCtx, new Input[]{interval, timezone, tsSymbol})
         );
     }
 

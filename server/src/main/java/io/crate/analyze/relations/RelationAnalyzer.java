@@ -55,6 +55,7 @@ import io.crate.expression.tablefunctions.ValuesFunction;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.FunctionImplementation;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.Schemas;
 import io.crate.metadata.SearchPath;
@@ -150,9 +151,10 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
 
         List<Symbol> childRelationFields = childRelation.outputs();
         var coordinatorTxnCtx = statementContext.transactionContext();
+        var nodeCtx = new NodeContext(functions);
         ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
-            functions,
             coordinatorTxnCtx,
+            nodeCtx,
             statementContext.paramTyeHints(),
             new FullQualifiedNameFieldProvider(
                 relationAnalysisContext.sources(),
@@ -264,8 +266,8 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
             if (joinCriteria instanceof JoinOn || joinCriteria instanceof JoinUsing) {
                 final CoordinatorTxnCtx coordinatorTxnCtx = statementContext.transactionContext();
                 ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
-                    functions,
                     coordinatorTxnCtx,
+                    new NodeContext(functions),
                     statementContext.paramTyeHints(),
                     new FullQualifiedNameFieldProvider(
                         relationContext.sources(),
@@ -319,8 +321,8 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
         RelationAnalysisContext context = statementContext.currentRelationContext();
         CoordinatorTxnCtx coordinatorTxnCtx = statementContext.transactionContext();
         ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
-            functions,
             coordinatorTxnCtx,
+            new NodeContext(functions),
             statementContext.paramTyeHints(),
             new FullQualifiedNameFieldProvider(
                 context.sources(),
@@ -626,8 +628,8 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
     public AnalyzedRelation visitTableFunction(TableFunction node, StatementAnalysisContext statementContext) {
         RelationAnalysisContext context = statementContext.currentRelationContext();
         ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
-            functions,
             statementContext.transactionContext(),
+            new NodeContext(functions),
             statementContext.paramTyeHints(),
             FieldProvider.UNSUPPORTED,
             null
@@ -670,8 +672,8 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
     @Override
     public AnalyzedRelation visitValues(Values values, StatementAnalysisContext context) {
         var expressionAnalyzer = new ExpressionAnalyzer(
-            functions,
             context.transactionContext(),
+            new NodeContext(functions),
             context.paramTyeHints(),
             FieldProvider.UNSUPPORTED,
             new SubqueryAnalyzer(this, context)

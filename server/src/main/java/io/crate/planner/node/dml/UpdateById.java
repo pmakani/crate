@@ -33,6 +33,7 @@ import io.crate.expression.symbol.Assignments;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.doc.DocTableInfo;
 import io.crate.planner.DependencyCarrier;
@@ -126,7 +127,7 @@ public final class UpdateById implements Plan {
         return new ShardRequestExecutor<>(
             clusterService,
             txnCtx,
-            dependencies.functions(),
+            new NodeContext(dependencies.functions()),
             table,
             updateRequests,
             dependencies.transportActionProvider().transportShardUpsertAction()::execute,

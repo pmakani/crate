@@ -47,6 +47,7 @@ import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.DocReferences;
 import io.crate.metadata.Functions;
 import io.crate.metadata.GeneratedReference;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.doc.DocSysColumns;
 import io.crate.metadata.doc.DocTableInfo;
@@ -190,7 +191,7 @@ public final class CopyToPlan implements Plan {
                                    SubQueryResults subQueryResults) {
         Function<? super Symbol, Object> eval = x -> SymbolEvaluator.evaluate(
             txnCtx,
-            functions,
+            new NodeContext(functions),
             x,
             parameters,
             subQueryResults

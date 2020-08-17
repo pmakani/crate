@@ -30,6 +30,7 @@ import io.crate.execution.ddl.RepositoryService;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.sql.tree.Expression;
 import io.crate.sql.tree.GenericProperties;
 import io.crate.sql.tree.RestoreSnapshot;
@@ -60,10 +61,11 @@ class RestoreSnapshotAnalyzer {
         repositoryService.failIfRepositoryDoesNotExist(repositoryName);
 
         var exprCtx = new ExpressionAnalysisContext();
+        var nodeCtx = new NodeContext(functions);
         var exprAnalyzerWithoutFields = new ExpressionAnalyzer(
-            functions, txnCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
+            txnCtx, nodeCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
         var exprAnalyzerWithFieldsAsString = new ExpressionAnalyzer(
-            functions, txnCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
+            txnCtx, nodeCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
 
         List<Table<Symbol>> tables = Lists2.map(
             restoreSnapshot.tables(),

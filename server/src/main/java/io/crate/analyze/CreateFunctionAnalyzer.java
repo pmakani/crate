@@ -32,6 +32,7 @@ import io.crate.analyze.relations.FieldProvider;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.SearchPath;
 import io.crate.sql.tree.CreateFunction;
 import io.crate.sql.tree.Expression;
@@ -52,8 +53,9 @@ public class CreateFunctionAnalyzer {
                                           ParamTypeHints paramTypeHints,
                                           CoordinatorTxnCtx txnCtx,
                                           SearchPath searchPath) {
+        var nodeCtx = new NodeContext(functions);
         var exprAnalyzerWithoutFields = new ExpressionAnalyzer(
-            functions, txnCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
+            txnCtx, nodeCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
         var exprCtx = new ExpressionAnalysisContext();
 
         CreateFunction<Symbol> createFunction = node.map(x -> exprAnalyzerWithoutFields.convert(x, exprCtx));

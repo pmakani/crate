@@ -45,6 +45,7 @@ import io.crate.expression.reference.sys.operation.OperationContextLog;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.RowGranularity;
 import io.crate.metadata.sys.SysJobsLogTableInfo;
 import io.crate.metadata.table.Operation;
@@ -174,8 +175,8 @@ public class JobsLogService extends AbstractLifecycleComponent implements Provid
         TableRelation sysJobsLogRelation = new TableRelation(jobsLogTable);
         systemTransactionCtx = CoordinatorTxnCtx.systemTransactionContext();
         this.expressionAnalyzer = new ExpressionAnalyzer(
-            functions,
             systemTransactionCtx,
+            new NodeContext(functions),
             ParamTypeHints.EMPTY,
             new NameFieldProvider(sysJobsLogRelation),
             null,

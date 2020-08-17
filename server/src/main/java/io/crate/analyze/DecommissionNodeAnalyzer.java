@@ -28,6 +28,7 @@ import io.crate.analyze.relations.FieldProvider;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.sql.tree.DecommissionNodeStatement;
 import io.crate.sql.tree.Expression;
 
@@ -43,8 +44,8 @@ public class DecommissionNodeAnalyzer {
                                             CoordinatorTxnCtx txnCtx,
                                             ParamTypeHints typeHints) {
         var expressionAnalyzer = new ExpressionAnalyzer(
-            functions,
             txnCtx,
+            new NodeContext(functions),
             typeHints,
             FieldProvider.UNSUPPORTED,
             null);

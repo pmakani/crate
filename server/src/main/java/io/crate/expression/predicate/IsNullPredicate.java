@@ -69,7 +69,7 @@ public class IsNullPredicate<T> extends Scalar<Boolean, T> {
     }
 
     @Override
-    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx) {
+    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx, NodeContext nodeCtx) {
         assert symbol != null : "function must not be null";
         assert symbol.arguments().size() == 1 : "function's number of arguments must be 1";
 

@@ -91,7 +91,7 @@ public abstract class ConcatFunction extends Scalar<String, String> {
     }
 
     @Override
-    public Symbol normalizeSymbol(Function function, TransactionContext txnCtx) {
+    public Symbol normalizeSymbol(Function function, TransactionContext txnCtx, NodeContext nodeCtx) {
         if (anyNonLiterals(function.arguments())) {
             return function;
         }
@@ -100,7 +100,7 @@ public abstract class ConcatFunction extends Scalar<String, String> {
             inputs[i] = ((Input) function.arguments().get(i));
         }
         //noinspection unchecked
-        return Literal.ofUnchecked(boundSignature.getReturnType().createType(), evaluate(txnCtx, null, inputs));
+        return Literal.ofUnchecked(boundSignature.getReturnType().createType(), evaluate(txnCtx, nodeCtx, inputs));
     }
 
     static class StringConcatFunction extends ConcatFunction {

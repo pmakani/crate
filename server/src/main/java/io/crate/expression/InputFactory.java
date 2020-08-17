@@ -38,6 +38,7 @@ import io.crate.expression.symbol.Symbol;
 import io.crate.expression.symbol.SymbolVisitor;
 import io.crate.metadata.FunctionImplementation;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.TransactionContext;
 
@@ -84,13 +85,13 @@ public class InputFactory {
             expressions,
             new RefVisitor<>(
                 txnCtx,
-                functions,
+                new NodeContext(functions),
                 new GatheringRefResolver<>(expressions::add, referenceResolver)));
     }
 
     public Context<CollectExpression<Row, ?>> ctxForInputColumns(TransactionContext txnCtx) {
         List<CollectExpression<Row, ?>> expressions = new ArrayList<>();
-        return new Context<>(expressions, new InputColumnVisitor(txnCtx, functions, expressions));
+        return new Context<>(expressions, new InputColumnVisitor(txnCtx, new NodeContext(functions), expressions));
     }
 
     public Context<CollectExpression<Row, ?>> ctxForInputColumns(TransactionContext txnCtx, Iterable<? extends Symbol> symbols) {
@@ -105,7 +106,7 @@ public class InputFactory {
         return new Context<>(
             expressions,
             aggregationContexts,
-            new AggregationVisitor(txnCtx, functions, expressions, aggregationContexts));
+            new AggregationVisitor(txnCtx, new NodeContext(functions), expressions, aggregationContexts));
     }
 
     public static class Context<T extends Input<?>> {
@@ -169,8 +170,8 @@ public class InputFactory {
         private final List<CollectExpression<Row, ?>> expressions;
         private final IntObjectMap<InputCollectExpression> inputCollectExpressions = new IntObjectHashMap<>();
 
-        InputColumnVisitor(TransactionContext txnCtx, Functions functions, List<CollectExpression<Row, ?>> expressions) {
-            super(txnCtx, functions);
+        InputColumnVisitor(TransactionContext txnCtx, NodeContext nodeCtx, List<CollectExpression<Row, ?>> expressions) {
+            super(txnCtx, nodeCtx);
             this.expressions = expressions;
         }
 
@@ -192,16 +193,16 @@ public class InputFactory {
         private final List<AggregationContext> aggregationContexts;
 
         AggregationVisitor(TransactionContext txnCtx,
-                           Functions functions,
+                           NodeContext nodeCtx,
                            List<CollectExpression<Row, ?>> expressions,
                            List<AggregationContext> aggregationContexts) {
-            super(txnCtx, functions, expressions);
+            super(txnCtx, nodeCtx, expressions);
             this.aggregationContexts = aggregationContexts;
         }
 
         @Override
         public Input<?> visitAggregation(Aggregation aggregation, Void context) {
-            FunctionImplementation impl = functions.getQualified(
+            FunctionImplementation impl = nodeCtx.functions().getQualified(
                 aggregation,
                 txnCtx.sessionSettings().searchPath()
             );
@@ -227,8 +228,8 @@ public class InputFactory {
         private final ReferenceResolver<T> referenceResolver;
         private final Map<Reference, T> referenceMap;
 
-        RefVisitor(TransactionContext txnCtx, Functions functions, ReferenceResolver<T> referenceResolver) {
-            super(txnCtx, functions);
+        RefVisitor(TransactionContext txnCtx, NodeContext nodeCtx, ReferenceResolver<T> referenceResolver) {
+            super(txnCtx, nodeCtx);
             this.referenceResolver = referenceResolver;
             this.referenceMap = new HashMap<>();
         }

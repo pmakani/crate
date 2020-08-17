@@ -22,25 +22,15 @@
 
 package io.crate.metadata;
 
-public interface NodeContext {
+public class NodeContext {
 
-    static NodeContext of(Functions functions) {
-        return new StaticNodeContext(functions);
+    private final Functions functions;
+
+    public NodeContext(Functions functions) {
+        this.functions = functions;
     }
 
-    Functions functions();
-
-    class StaticNodeContext implements NodeContext {
-
-        private final Functions functions;
-
-        StaticNodeContext(Functions functions) {
-            this.functions = functions;
-        }
-
-        @Override
-        public Functions functions() {
-            return functions;
-        }
+    public Functions functions() {
+        return functions;
     }
 }

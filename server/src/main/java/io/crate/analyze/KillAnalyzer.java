@@ -27,6 +27,7 @@ import io.crate.analyze.relations.FieldProvider;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.sql.tree.Expression;
 import io.crate.sql.tree.KillStatement;
 
@@ -43,8 +44,9 @@ public class KillAnalyzer {
                                 CoordinatorTxnCtx txnCtx) {
         Symbol jobId;
         if (killStatement.jobId() != null) {
+            var nodeCtx = new NodeContext(functions);
             var exprAnalyzerWithoutFields = new ExpressionAnalyzer(
-                functions, txnCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
+                txnCtx, nodeCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
             jobId = exprAnalyzerWithoutFields.convert(
                 killStatement.jobId(),
                 new ExpressionAnalysisContext());

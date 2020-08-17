@@ -31,6 +31,7 @@ import io.crate.execution.support.OneRowActionListener;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.Functions;
 import io.crate.metadata.IndexParts;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.PartitionName;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.TransactionContext;
@@ -83,7 +84,7 @@ public class DeletePartitions implements Plan {
     ArrayList<String> getIndices(TransactionContext txnCtx, Functions functions, Row parameters, SubQueryResults subQueryResults) {
         ArrayList<String> indexNames = new ArrayList<>();
         Function<Symbol, String> symbolToString =
-            s -> DataTypes.STRING.implicitCast(SymbolEvaluator.evaluate(txnCtx, functions, s, parameters, subQueryResults));
+            s -> DataTypes.STRING.implicitCast(SymbolEvaluator.evaluate(txnCtx, new NodeContext(functions), s, parameters, subQueryResults));
         for (List<Symbol> partitionValues : partitions) {
             List<String> values = Lists2.map(partitionValues, symbolToString);
             String indexName = IndexParts.toIndexName(relationName, PartitionName.encodeIdent(values));

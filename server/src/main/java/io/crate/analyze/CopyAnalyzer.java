@@ -32,6 +32,7 @@ import io.crate.expression.eval.EvaluatingNormalizer;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.RowGranularity;
 import io.crate.metadata.Schemas;
 import io.crate.metadata.doc.DocTableInfo;
@@ -63,11 +64,12 @@ class CopyAnalyzer {
             txnCtx.sessionContext().searchPath());
 
         var exprCtx = new ExpressionAnalysisContext();
+        var nodeCtx = new NodeContext(functions);
 
         var exprAnalyzerWithoutFields = new ExpressionAnalyzer(
-            functions, txnCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
+            txnCtx, nodeCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
         var exprAnalyzerWithFieldsAsString = new ExpressionAnalyzer(
-            functions, txnCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
+            txnCtx, nodeCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
 
         var normalizer = new EvaluatingNormalizer(
             functions,
@@ -115,17 +117,18 @@ class CopyAnalyzer {
             RowGranularity.CLUSTER,
             null,
             tableRelation);
+        NodeContext nodeCtx = new NodeContext(functions);
 
         var exprCtx = new ExpressionAnalysisContext();
         var expressionAnalyzer = new ExpressionAnalyzer(
-            functions,
             txnCtx,
+            nodeCtx,
             paramTypeHints,
             new NameFieldProvider(tableRelation),
             null);
         var exprAnalyzerWithFieldsAsString = new ExpressionAnalyzer(
-            functions,
             txnCtx,
+            nodeCtx,
             paramTypeHints,
             FieldProvider.FIELDS_AS_LITERAL,
             null);

@@ -28,6 +28,7 @@ import io.crate.analyze.relations.FieldProvider;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.sql.tree.AlterUser;
 import io.crate.sql.tree.CreateUser;
 import io.crate.sql.tree.Expression;
@@ -62,8 +63,8 @@ public class UserAnalyzer {
                                                        CoordinatorTxnCtx txnContext) {
         ExpressionAnalysisContext exprContext = new ExpressionAnalysisContext();
         ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
-            functions,
             txnContext,
+            new NodeContext(functions),
             paramTypeHints,
             FieldProvider.UNSUPPORTED,
             null

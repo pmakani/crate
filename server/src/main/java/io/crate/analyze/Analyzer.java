@@ -21,6 +21,7 @@
 
 package io.crate.analyze;
 
+import io.crate.metadata.NodeContext;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.inject.Singleton;
@@ -134,6 +135,7 @@ public class Analyzer {
     private final KillAnalyzer killAnalyzer;
     private final SetStatementAnalyzer setStatementAnalyzer;
     private final ResetStatementAnalyzer resetStatementAnalyzer;
+    private final NodeContext nodeCtx;
 
     /**
      * @param relationAnalyzer is injected because we also need to inject it in
@@ -150,6 +152,7 @@ public class Analyzer {
                     UserManager userManager,
                     SessionSettingRegistry sessionSettingRegistry
     ) {
+        this.nodeCtx = new NodeContext(functions);
         this.relationAnalyzer = relationAnalyzer;
         this.dropTableAnalyzer = new DropTableAnalyzer(schemas);
         this.dropCheckConstraintAnalyzer = new DropCheckConstraintAnalyzer(schemas);
@@ -186,6 +189,10 @@ public class Analyzer {
         this.copyAnalyzer = new CopyAnalyzer(schemas, functions);
         this.setStatementAnalyzer = new SetStatementAnalyzer(functions);
         this.resetStatementAnalyzer = new ResetStatementAnalyzer(functions);
+    }
+
+    public NodeContext nodeContext() {
+        return nodeCtx;
     }
 
     public AnalyzedStatement analyze(Statement statement,

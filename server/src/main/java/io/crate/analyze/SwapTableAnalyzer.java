@@ -30,6 +30,7 @@ import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Schemas;
 import io.crate.metadata.SearchPath;
 import io.crate.metadata.doc.DocTableInfo;
@@ -63,8 +64,9 @@ public final class SwapTableAnalyzer {
         if (dropSourceExpr == null) {
             dropSource = Literal.BOOLEAN_FALSE;
         } else {
+            NodeContext nodeCtx = new NodeContext(functions);
             ExpressionAnalyzer exprAnalyzer = new ExpressionAnalyzer(
-                functions, txnCtx, typeHints, FieldProvider.UNSUPPORTED, null);
+                txnCtx, nodeCtx, typeHints, FieldProvider.UNSUPPORTED, null);
             dropSource = exprAnalyzer.convert(dropSourceExpr, new ExpressionAnalysisContext());
         }
         SearchPath searchPath = txnCtx.sessionContext().searchPath();

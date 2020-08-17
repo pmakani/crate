@@ -27,6 +27,7 @@ import io.crate.analyze.WhereClause;
 import io.crate.data.Row;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Routing;
 import io.crate.metadata.RoutingProvider;
 import io.crate.metadata.table.TableInfo;
@@ -47,8 +48,8 @@ public class PlannerContext {
             context.clusterState,
             context.routingProvider,
             UUID.randomUUID(),
-            context.functions,
             context.coordinatorTxnCtx,
+            context.nodeCtx,
             fetchSize,
             context.params
         );
@@ -59,7 +60,7 @@ public class PlannerContext {
     private final int fetchSize;
     private final RoutingBuilder routingBuilder;
     private final RoutingProvider routingProvider;
-    private final Functions functions;
+    private final NodeContext nodeCtx;
     private final ClusterState clusterState;
     private int executionPhaseId = 0;
     private final String handlerNode;
@@ -72,12 +73,12 @@ public class PlannerContext {
     public PlannerContext(ClusterState clusterState,
                           RoutingProvider routingProvider,
                           UUID jobId,
-                          Functions functions,
                           CoordinatorTxnCtx coordinatorTxnCtx,
+                          NodeContext nodeCtx,
                           int fetchSize,
                           @Nullable Row params) {
         this.routingProvider = routingProvider;
-        this.functions = functions;
+        this.nodeCtx = nodeCtx;
         this.params = params;
         this.routingBuilder = new RoutingBuilder(clusterState, routingProvider);
         this.clusterState = clusterState;
@@ -132,7 +133,11 @@ public class PlannerContext {
     }
 
     public Functions functions() {
-        return functions;
+        return nodeCtx.functions();
+    }
+
+    public NodeContext nodeContext() {
+        return nodeCtx;
     }
 
     public ClusterState clusterState() {

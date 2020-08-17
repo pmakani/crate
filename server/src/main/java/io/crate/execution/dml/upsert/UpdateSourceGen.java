@@ -35,6 +35,7 @@ import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.TransactionContext;
 import io.crate.metadata.doc.DocTableInfo;
@@ -156,7 +157,7 @@ final class UpdateSourceGen {
         private Evaluator(Functions functions,
                           TransactionContext txnCtx,
                           ReferenceResolver<CollectExpression<Doc, ?>> refResolver) {
-            super(txnCtx, functions);
+            super(txnCtx, new NodeContext(functions));
             this.refResolver = refResolver;
         }
 

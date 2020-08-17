@@ -31,6 +31,7 @@ import io.crate.data.RowConsumer;
 import io.crate.execution.ddl.RelationNameSwap;
 import io.crate.execution.ddl.SwapRelationsRequest;
 import io.crate.execution.support.OneRowActionListener;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.RelationName;
 import io.crate.planner.operators.SubQueryResults;
 import io.crate.types.DataTypes;
@@ -63,7 +64,7 @@ public class SwapTablePlan implements Plan {
         boolean dropSource = Objects.requireNonNull(
             DataTypes.BOOLEAN.sanitizeValue(SymbolEvaluator.evaluate(
                 plannerContext.transactionContext(),
-                dependencies.functions(),
+                new NodeContext(dependencies.functions()),
                 swapTable.dropSource(),
                 params,
                 subQueryResults

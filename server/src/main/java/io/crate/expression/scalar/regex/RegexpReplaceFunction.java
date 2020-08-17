@@ -93,8 +93,8 @@ public final class RegexpReplaceFunction extends Scalar<String, String> {
     }
 
     @Override
-    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx) {
-        return evaluateIfLiterals(this, txnCtx, symbol);
+    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx, NodeContext nodeCtx) {
+        return evaluateIfLiterals(this, txnCtx, nodeCtx, symbol);
     }
 
     @Override

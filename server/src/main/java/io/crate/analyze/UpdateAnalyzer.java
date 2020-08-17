@@ -41,6 +41,7 @@ import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.RowGranularity;
 import io.crate.metadata.table.Operation;
@@ -106,8 +107,8 @@ public final class UpdateAnalyzer {
             new SubqueryAnalyzer(relationAnalyzer, new StatementAnalysisContext(typeHints, Operation.READ, txnCtx));
 
         ExpressionAnalyzer sourceExprAnalyzer = new ExpressionAnalyzer(
-            functions,
             txnCtx,
+            new NodeContext(functions),
             typeHints,
             new FullQualifiedNameFieldProvider(
                 relCtx.sources(),
@@ -153,8 +154,8 @@ public final class UpdateAnalyzer {
                                                       ExpressionAnalysisContext exprCtx) {
         HashMap<Reference, Symbol> assignmentByTargetCol = new HashMap<>();
         ExpressionAnalyzer targetExprAnalyzer = new ExpressionAnalyzer(
-            functions,
             txnCtx,
+            new NodeContext(functions),
             typeHints,
             new NameFieldProvider(table),
             subqueryAnalyzer,

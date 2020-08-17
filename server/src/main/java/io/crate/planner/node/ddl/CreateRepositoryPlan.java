@@ -33,6 +33,7 @@ import io.crate.execution.support.OneRowActionListener;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.planner.DependencyCarrier;
 import io.crate.planner.Plan;
 import io.crate.planner.PlannerContext;
@@ -84,7 +85,7 @@ public class CreateRepositoryPlan implements Plan {
                                                      RepositoryParamValidator repositoryParamValidator) {
         Function<? super Symbol, Object> eval = x -> SymbolEvaluator.evaluate(
             txnCtx,
-            functions,
+            new NodeContext(functions),
             x,
             parameters,
             subQueryResults

@@ -35,6 +35,7 @@ import io.crate.expression.symbol.InputColumn;
 import io.crate.expression.symbol.SelectSymbol;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.PartitionName;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.TransactionContext;
@@ -126,7 +127,7 @@ public class UpdatePlannerTest extends CrateDummyClusterServiceUnitTest {
         assertThat(updateById.assignmentByTargetCol().values(), contains(isLiteral("Vogon lyric fan")));
         assertThat(updateById.docKeys().size(), is(1));
 
-        assertThat(updateById.docKeys().getOnlyKey().getId(txnCtx, e.functions(), Row.EMPTY, SubQueryResults.EMPTY), is("1"));
+        assertThat(updateById.docKeys().getOnlyKey().getId(txnCtx, new NodeContext(e.functions()), Row.EMPTY, SubQueryResults.EMPTY), is("1"));
     }
 
     @Test

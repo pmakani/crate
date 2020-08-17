@@ -131,7 +131,7 @@ public class WithinFunction extends Scalar<Boolean, Object> {
     }
 
     @Override
-    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx) {
+    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx, NodeContext nodeCtx) {
         Symbol left = symbol.arguments().get(0);
         Symbol right = symbol.arguments().get(1);
 

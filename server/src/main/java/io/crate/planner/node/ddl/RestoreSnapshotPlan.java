@@ -42,6 +42,7 @@ import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
 import io.crate.metadata.IndexParts;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.PartitionName;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.Schemas;
@@ -149,7 +150,7 @@ public class RestoreSnapshotPlan implements Plan {
                                             Schemas schemas) {
         Function<? super Symbol, Object> eval = x -> SymbolEvaluator.evaluate(
             txnCtx,
-            functions,
+            new NodeContext(functions),
             x,
             parameters,
             subQueryResults

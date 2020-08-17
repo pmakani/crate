@@ -33,6 +33,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
+import io.crate.metadata.NodeContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.cluster.ClusterState;
@@ -170,6 +171,7 @@ public class Session implements AutoCloseable {
      */
     public void quickExec(String statement, Function<String, Statement> parse, ResultReceiver<?> resultReceiver, Row params) {
         CoordinatorTxnCtx txnCtx = new CoordinatorTxnCtx(sessionContext);
+        NodeContext nodeCtx = new NodeContext(planner.functions());
         Statement parsedStmt = parse.apply(statement);
         AnalyzedStatement analyzedStatement = analyzer.analyze(parsedStmt, sessionContext, ParamTypeHints.EMPTY);
         RoutingProvider routingProvider = new RoutingProvider(Randomness.get().nextInt(), planner.getAwarenessAttributes());
@@ -179,8 +181,8 @@ public class Session implements AutoCloseable {
             clusterState,
             routingProvider,
             jobId,
-            planner.functions(),
             txnCtx,
+            nodeCtx,
             0,
             params
         );
@@ -210,7 +212,8 @@ public class Session implements AutoCloseable {
                     routingProvider,
                     new RowConsumerToResultReceiver(retryResultReceiver, 0, jobsLogsUpdateListener),
                     params,
-                    txnCtx
+                    txnCtx,
+                    nodeCtx
                 )
             );
         }
@@ -223,13 +226,14 @@ public class Session implements AutoCloseable {
                             RoutingProvider routingProvider,
                             RowConsumer consumer,
                             Row params,
-                            CoordinatorTxnCtx txnCtx) {
+                            CoordinatorTxnCtx txnCtx,
+                            NodeContext nodeCtx) {
         PlannerContext plannerContext = new PlannerContext(
             planner.currentClusterState(),
             routingProvider,
             jobId,
-            planner.functions(),
             txnCtx,
+            nodeCtx,
             0,
             params
         );
@@ -483,12 +487,13 @@ public class Session implements AutoCloseable {
         var routingProvider = new RoutingProvider(Randomness.get().nextInt(), planner.getAwarenessAttributes());
         var clusterState = executor.clusterService().state();
         var txnCtx = new CoordinatorTxnCtx(sessionContext);
+        var nodeCtx = new NodeContext(planner.functions());
         var plannerContext = new PlannerContext(
             clusterState,
             routingProvider,
             jobId,
-            executor.functions(),
             txnCtx,
+            nodeCtx,
             0,
             null);
 
@@ -564,9 +569,10 @@ public class Session implements AutoCloseable {
         var routingProvider = new RoutingProvider(Randomness.get().nextInt(), planner.getAwarenessAttributes());
         var clusterState = executor.clusterService().state();
         var txnCtx = new CoordinatorTxnCtx(sessionContext);
+        var nodeCtx = new NodeContext(executor.functions());
         var params = new RowN(portal.params().toArray());
         var plannerContext = new PlannerContext(
-            clusterState, routingProvider, jobId, executor.functions(), txnCtx, maxRows, params);
+            clusterState, routingProvider, jobId, txnCtx, nodeCtx, maxRows, params);
         var analyzedStmt = portal.analyzedStatement();
         String rawStatement = portal.preparedStmt().rawStatement();
         if (analyzedStmt == null) {
@@ -597,7 +603,8 @@ public class Session implements AutoCloseable {
                         maxRows,
                         new JobsLogsUpdateListener(newJobId, jobsLogs)),
                     params,
-                    txnCtx
+                    txnCtx,
+                    nodeCtx
                 )
             );
         }

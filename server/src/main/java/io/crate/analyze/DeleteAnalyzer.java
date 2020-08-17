@@ -35,6 +35,7 @@ import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.RowGranularity;
 import io.crate.metadata.table.Operation;
 import io.crate.sql.tree.Delete;
@@ -66,8 +67,8 @@ final class DeleteAnalyzer {
         DocTableRelation table = (DocTableRelation) relation;
         EvaluatingNormalizer normalizer = new EvaluatingNormalizer(functions, RowGranularity.CLUSTER, null, table);
         ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
-            functions,
             txnContext,
+            new NodeContext(functions),
             typeHints,
             new FullQualifiedNameFieldProvider(
                 relationCtx.sources(),

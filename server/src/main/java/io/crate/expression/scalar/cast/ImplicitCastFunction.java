@@ -83,7 +83,8 @@ public class ImplicitCastFunction extends Scalar<Object, Object> {
 
     @Override
     public Symbol normalizeSymbol(io.crate.expression.symbol.Function symbol,
-                                  TransactionContext txnCtx) {
+                                  TransactionContext txnCtx,
+                                  NodeContext nodeCtx) {
         Symbol argument = symbol.arguments().get(0);
 
         var targetTypeAsString = (String) ((Input<?>) symbol.arguments().get(1)).value();

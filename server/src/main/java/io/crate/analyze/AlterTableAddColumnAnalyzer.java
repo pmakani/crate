@@ -31,6 +31,7 @@ import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.ReferenceIdent;
 import io.crate.metadata.RelationName;
@@ -74,11 +75,12 @@ class AlterTableAddColumnAnalyzer {
             txnCtx.sessionContext().user(),
             txnCtx.sessionContext().searchPath());
         TableReferenceResolver referenceResolver = new TableReferenceResolver(tableInfo.columns(), tableInfo.ident());
+        NodeContext nodeCtx = new NodeContext(functions);
 
         var exprAnalyzerWithReferenceResolver = new ExpressionAnalyzer(
-            functions, txnCtx, paramTypeHints, referenceResolver, null);
+            txnCtx, nodeCtx, paramTypeHints, referenceResolver, null);
         var exprAnalyzerWithFieldsAsString = new ExpressionAnalyzer(
-            functions, txnCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
+            txnCtx, nodeCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
         var exprCtx = new ExpressionAnalysisContext();
 
         AddColumnDefinition<Expression> tableElement = alterTable.tableElement();
@@ -109,8 +111,8 @@ class AlterTableAddColumnAnalyzer {
             singletonList(addColumnDefinitionWithExpression), tableInfo.ident(), tableInfo);
         // now analyze possible check expressions
         var checkColumnConstraintsAnalyzer = new ExpressionAnalyzer(
-            functions,
             txnCtx,
+            nodeCtx,
             paramTypeHints,
             new SelfReferenceFieldProvider(
                 tableInfo.ident(), referenceResolver, analyzedTableElements.columns()),

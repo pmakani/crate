@@ -27,6 +27,7 @@ import io.crate.common.annotations.VisibleForTesting;
 import io.crate.data.Row;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.TransactionContext;
 import io.crate.planner.operators.SubQueryResults;
 import io.crate.sql.tree.GenericProperties;
@@ -68,7 +69,7 @@ public final class UserActions {
                                                 Functions functions) throws IllegalArgumentException {
         Function<? super Symbol, Object> eval = x -> SymbolEvaluator.evaluate(
             txnCtx,
-            functions,
+            new NodeContext(functions),
             x,
             parameters,
             SubQueryResults.EMPTY

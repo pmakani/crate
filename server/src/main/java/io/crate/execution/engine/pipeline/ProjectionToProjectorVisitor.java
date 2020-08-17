@@ -91,6 +91,7 @@ import io.crate.expression.symbol.Symbols;
 import io.crate.memory.MemoryManager;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.RowGranularity;
@@ -340,7 +341,7 @@ public class ProjectionToProjectorVisitor
 
         projection = projection.normalize(normalizer, context.txnCtx);
         String uri = DataTypes.STRING.sanitizeValue(
-            SymbolEvaluator.evaluate(context.txnCtx, functions, projection.uri(), Row.EMPTY, SubQueryResults.EMPTY));
+            SymbolEvaluator.evaluate(context.txnCtx, new NodeContext(functions), projection.uri(), Row.EMPTY, SubQueryResults.EMPTY));
         assert uri != null : "URI must not be null";
 
         StringBuilder sb = new StringBuilder(uri);

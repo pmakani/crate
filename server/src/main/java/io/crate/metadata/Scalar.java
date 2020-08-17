@@ -86,9 +86,9 @@ public abstract class Scalar<ReturnType, InputType> implements FunctionImplement
     }
 
     @Override
-    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx) {
+    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx, NodeContext nodeCtx) {
         try {
-            return evaluateIfLiterals(this, txnCtx, symbol);
+            return evaluateIfLiterals(this, txnCtx, nodeCtx, symbol);
         } catch (Throwable t) {
             return symbol;
         }
@@ -109,6 +109,7 @@ public abstract class Scalar<ReturnType, InputType> implements FunctionImplement
      */
     protected static <ReturnType, InputType> Symbol evaluateIfLiterals(Scalar<ReturnType, InputType> scalar,
                                                                        TransactionContext txnCtx,
+                                                                       NodeContext nodeCtx,
                                                                        Function function) {
         List<Symbol> arguments = function.arguments();
         for (Symbol argument : arguments) {
@@ -123,7 +124,7 @@ public abstract class Scalar<ReturnType, InputType> implements FunctionImplement
             idx++;
         }
         //noinspection unchecked
-        return Literal.ofUnchecked(function.valueType(), scalar.evaluate(txnCtx, null, inputs));
+        return Literal.ofUnchecked(function.valueType(), scalar.evaluate(txnCtx, nodeCtx, inputs));
     }
 
     public enum Feature {

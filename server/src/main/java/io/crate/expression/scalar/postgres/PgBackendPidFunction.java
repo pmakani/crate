@@ -61,7 +61,7 @@ public class PgBackendPidFunction extends Scalar<Integer, Void> {
     }
 
     @Override
-    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx) {
+    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx, NodeContext nodeCtx) {
         assert symbol.arguments().size() == 0 : "function's number of arguments must be 0";
         return Literal.of(-1);
     }

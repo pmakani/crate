@@ -518,7 +518,7 @@ public class InsertFromValues implements LogicalPlan {
                                                             SubQueryResults subQueryResults) {
         SymbolEvaluator symbolEval = new SymbolEvaluator(
             plannerContext.transactionContext(),
-            plannerContext.functions(),
+            plannerContext.nodeContext(),
             subQueryResults);
         Function<? super Symbol, Input<?>> eval = (symbol) -> symbol.accept(symbolEval, params);
 
@@ -529,7 +529,7 @@ public class InsertFromValues implements LogicalPlan {
         //noinspection unchecked
         Iterable<Row> rows = funcImplementation.evaluate(
             plannerContext.transactionContext(),
-            NodeContext.of(plannerContext.functions()),
+            new NodeContext(plannerContext.functions()),
             boundArguments.toArray(new Input[0]));
 
         return StreamSupport.stream(rows.spliterator(), false)

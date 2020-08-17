@@ -49,6 +49,7 @@ import io.crate.memory.MemoryManager;
 import io.crate.memory.OnHeapMemoryManager;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.ReferenceIdent;
 import io.crate.metadata.Routing;
@@ -521,7 +522,8 @@ public abstract class AggregationTest extends ESTestCase {
         );
         return function.normalizeSymbol(
             new Function(function.signature(), arguments, function.partialType()),
-            new CoordinatorTxnCtx(SessionContext.systemSessionContext())
+            new CoordinatorTxnCtx(SessionContext.systemSessionContext()),
+            new NodeContext(functions)
         );
     }
 

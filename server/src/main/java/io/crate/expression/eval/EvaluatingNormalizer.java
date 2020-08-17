@@ -40,6 +40,7 @@ import io.crate.metadata.Functions;
 import io.crate.metadata.Reference;
 import io.crate.metadata.RowGranularity;
 import io.crate.metadata.TransactionContext;
+import io.crate.metadata.NodeContext;
 import io.crate.types.DataTypes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,7 +57,7 @@ import java.util.function.Predicate;
 /**
  * The normalizer does several things:
  *
- *  - Convert functions into a simpler form by using {@link FunctionImplementation#normalizeSymbol(Function, TransactionContext)}
+ *  - Convert functions into a simpler form by using {@link FunctionImplementation#normalizeSymbol(Function, TransactionContext, NodeContext)}
  *  - Convert {@link ScopedSymbol} to {@link Reference} if {@link FieldResolver} is available.
  *  - Convert {@link MatchPredicate} to a {@link Function} if {@link FieldResolver} is available
  *  - Convert {@link Reference} into a Literal value if {@link ReferenceResolver} is available
@@ -207,7 +208,7 @@ public class EvaluatingNormalizer {
                 context.sessionSettings().searchPath()
             );
             assert implementation != null : "Function implementation not found using full qualified lookup: " + function;
-            return implementation.normalizeSymbol(function, context);
+            return implementation.normalizeSymbol(function, context, new NodeContext(functions));
         }
 
         @Override

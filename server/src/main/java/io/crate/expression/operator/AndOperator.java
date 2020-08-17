@@ -71,7 +71,7 @@ public class AndOperator extends Operator<Boolean> {
     }
 
     @Override
-    public Symbol normalizeSymbol(Function function, TransactionContext txnCtx) {
+    public Symbol normalizeSymbol(Function function, TransactionContext txnCtx, NodeContext nodeCtx) {
         assert function != null : "function must not be null";
         assert function.arguments().size() == 2 : "number of args must be 2";
 

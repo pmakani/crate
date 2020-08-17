@@ -35,6 +35,7 @@ import io.crate.expression.InputFactory;
 import io.crate.expression.reference.file.FileLineReferenceResolver;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.TransactionContext;
 import io.crate.planner.operators.SubQueryResults;
 import io.crate.types.ArrayType;
@@ -99,7 +100,7 @@ public class FileCollectSource implements CollectSource {
     private static List<String> targetUriToStringList(TransactionContext txnCtx,
                                                       Functions functions,
                                                       Symbol targetUri) {
-        Object value = SymbolEvaluator.evaluate(txnCtx, functions, targetUri, Row.EMPTY, SubQueryResults.EMPTY);
+        Object value = SymbolEvaluator.evaluate(txnCtx, new NodeContext(functions), targetUri, Row.EMPTY, SubQueryResults.EMPTY);
         if (DataTypes.isSameType(targetUri.valueType(), DataTypes.STRING)) {
             String uri = (String) value;
             return Collections.singletonList(uri);

@@ -45,6 +45,7 @@ import io.crate.expression.symbol.Symbol;
 import io.crate.expression.tablefunctions.TableFunctionModule;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.RowGranularity;
 import io.crate.metadata.Schemas;
@@ -99,8 +100,8 @@ public class SqlExpressions {
         functions = injector.getInstance(Functions.class);
         coordinatorTxnCtx = new CoordinatorTxnCtx(new SessionContext(Option.NONE, user));
         expressionAnalyzer = new ExpressionAnalyzer(
-            functions,
             coordinatorTxnCtx,
+            new NodeContext(functions),
             ParamTypeHints.EMPTY,
             new FullQualifiedNameFieldProvider(
                 sources,

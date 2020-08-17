@@ -26,6 +26,7 @@ import io.crate.data.Row;
 import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
+import io.crate.metadata.NodeContext;
 import io.crate.planner.operators.SubQueryResults;
 import org.elasticsearch.test.ESTestCase;
 import org.junit.Test;
@@ -48,8 +49,8 @@ public class DocKeysTest extends ESTestCase {
         DocKeys docKeys = new DocKeys(pks, false, false, 1, null);
         DocKeys.DocKey key = docKeys.getOnlyKey();
         CoordinatorTxnCtx txnCtx = CoordinatorTxnCtx.systemTransactionContext();
-        assertThat(key.getRouting(txnCtx, getFunctions(), Row.EMPTY, SubQueryResults.EMPTY), is("Ford"));
-        assertThat(key.getId(txnCtx, getFunctions(), Row.EMPTY, SubQueryResults.EMPTY), is("AgRGb3JkATE="));
+        assertThat(key.getRouting(txnCtx, new NodeContext(getFunctions()), Row.EMPTY, SubQueryResults.EMPTY), is("Ford"));
+        assertThat(key.getId(txnCtx, new NodeContext(getFunctions()), Row.EMPTY, SubQueryResults.EMPTY), is("AgRGb3JkATE="));
     }
 
     @Test
@@ -61,10 +62,10 @@ public class DocKeysTest extends ESTestCase {
                                       null);
         DocKeys.DocKey key = docKeys.getOnlyKey();
         CoordinatorTxnCtx txnCtx = CoordinatorTxnCtx.systemTransactionContext();
-        Optional<Long> sequenceNo = key.sequenceNo(txnCtx, getFunctions(), Row.EMPTY, SubQueryResults.EMPTY);
+        Optional<Long> sequenceNo = key.sequenceNo(txnCtx, new NodeContext(getFunctions()), Row.EMPTY, SubQueryResults.EMPTY);
         assertThat(sequenceNo.isPresent(), is(true));
         assertThat(sequenceNo.get(), is(22L));
-        Optional<Long> primaryTerm = key.primaryTerm(txnCtx, getFunctions(), Row.EMPTY, SubQueryResults.EMPTY);
+        Optional<Long> primaryTerm = key.primaryTerm(txnCtx, new NodeContext(getFunctions()), Row.EMPTY, SubQueryResults.EMPTY);
         assertThat(primaryTerm.isPresent(), is(true));
         assertThat(primaryTerm.get(), is(5L));
     }

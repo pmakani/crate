@@ -29,6 +29,7 @@ import io.crate.expression.symbol.FunctionCopyVisitor;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.planner.PlannerContext;
 import io.crate.planner.optimizer.matcher.Captures;
 import io.crate.planner.optimizer.matcher.Match;
@@ -82,9 +83,8 @@ public class Optimizer {
                         args,
                         null,
                         null,
-                        functions,
-                        coordinatorTxnCtx
-                    );
+                        coordinatorTxnCtx,
+                        new NodeContext(functions));
                 } catch (ConversionException e) {
                     return null;
                 }

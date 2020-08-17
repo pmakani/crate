@@ -28,6 +28,7 @@ import io.crate.analyze.relations.FieldProvider;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Schemas;
 import io.crate.metadata.table.Operation;
 import io.crate.metadata.table.TableInfo;
@@ -50,8 +51,9 @@ public class OptimizeTableAnalyzer {
     public AnalyzedOptimizeTable analyze(OptimizeStatement<Expression> statement,
                                          ParamTypeHints paramTypeHints,
                                          CoordinatorTxnCtx txnCtx) {
+        var nodeCtx = new NodeContext(functions);
         var exprAnalyzerWithFieldsAsString = new ExpressionAnalyzer(
-            functions, txnCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
+            txnCtx, nodeCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
 
         var exprCtx = new ExpressionAnalysisContext();
         OptimizeStatement<Symbol> analyzedStatement =

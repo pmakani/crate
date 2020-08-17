@@ -30,6 +30,7 @@ import io.crate.expression.scalar.arithmetic.ArrayFunction;
 import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.ParameterSymbol;
 import io.crate.expression.symbol.Symbol;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.SearchPath;
 import io.crate.metadata.TransactionContext;
 import io.crate.metadata.settings.SessionSettings;
@@ -54,7 +55,7 @@ public class UpdateSettingsPlanTest extends ESTestCase {
     private Function<Symbol, Object> symbolEvaluator(Row row) {
         return x -> SymbolEvaluator.evaluate(
             TransactionContext.of(new SessionSettings("", SearchPath.createSearchPathFrom(""))),
-            getFunctions(),
+            new NodeContext(getFunctions()),
             x,
             row,
             SubQueryResults.EMPTY);

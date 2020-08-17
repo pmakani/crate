@@ -45,6 +45,7 @@ import io.crate.analyze.relations.RelationAnalyzer;
 import io.crate.analyze.relations.StatementAnalysisContext;
 import io.crate.auth.user.User;
 import io.crate.auth.user.UserManager;
+import io.crate.common.annotations.VisibleForTesting;
 import io.crate.common.collections.MapBuilder;
 import io.crate.data.Row;
 import io.crate.execution.ddl.RepositoryService;
@@ -59,6 +60,7 @@ import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.FulltextAnalyzerResolver;
 import io.crate.metadata.Functions;
 import io.crate.metadata.IndexParts;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.PartitionName;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.RoutingProvider;
@@ -176,12 +178,12 @@ public class SQLExecutor {
 
     private static final Logger LOGGER = LogManager.getLogger(SQLExecutor.class);
 
-    private final Functions functions;
     public final Analyzer analyzer;
     public final Planner planner;
     private final RelationAnalyzer relAnalyzer;
     private final SessionContext sessionContext;
     private final CoordinatorTxnCtx coordinatorTxnCtx;
+    private final NodeContext nodeCtx;
     private final Random random;
     private final Schemas schemas;
     private final FulltextAnalyzerResolver fulltextAnalyzerResolver;
@@ -200,8 +202,8 @@ public class SQLExecutor {
             clusterState,
             new RoutingProvider(random.nextInt(), emptyList()),
             UUID.randomUUID(),
-            functions,
             new CoordinatorTxnCtx(sessionContext),
+            nodeCtx,
             -1,
             null
         );
@@ -669,19 +671,20 @@ public class SQLExecutor {
                         Schemas schemas,
                         Random random,
                         FulltextAnalyzerResolver fulltextAnalyzerResolver) {
-        this.functions = functions;
         this.analyzer = analyzer;
         this.planner = planner;
         this.relAnalyzer = relAnalyzer;
         this.sessionContext = sessionContext;
         this.coordinatorTxnCtx = new CoordinatorTxnCtx(sessionContext);
+        this.nodeCtx = new NodeContext(functions);
         this.schemas = schemas;
         this.random = random;
         this.fulltextAnalyzerResolver = fulltextAnalyzerResolver;
     }
 
+    @VisibleForTesting
     public Functions functions() {
-        return functions;
+        return nodeCtx.functions();
     }
 
     public FulltextAnalyzerResolver fulltextAnalyzerResolver() {
@@ -716,8 +719,8 @@ public class SQLExecutor {
         }
         CoordinatorTxnCtx coordinatorTxnCtx = new CoordinatorTxnCtx(sessionContext);
         ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
-            functions,
             coordinatorTxnCtx,
+            nodeCtx,
             ParamTypeHints.EMPTY,
             new FullQualifiedNameFieldProvider(
                 sources.immutableMap(),
@@ -748,8 +751,8 @@ public class SQLExecutor {
             planner.currentClusterState(),
             routingProvider,
             jobId,
-            functions,
             coordinatorTxnCtx,
+            nodeCtx,
             fetchSize,
             null
         );
@@ -757,7 +760,7 @@ public class SQLExecutor {
         if (plan instanceof LogicalPlan) {
             return (T) ((LogicalPlan) plan).build(
                 plannerContext,
-                new ProjectionBuilder(functions),
+                new ProjectionBuilder(nodeCtx.functions()),
                 TopN.NO_LIMIT,
                 0,
                 null,

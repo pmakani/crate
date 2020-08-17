@@ -92,7 +92,7 @@ public class DistanceFunction extends Scalar<Double, Point> {
     }
 
     @Override
-    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx) {
+    public Symbol normalizeSymbol(Function symbol, TransactionContext txnCtx, NodeContext nodeCtx) {
         Symbol arg1 = symbol.arguments().get(0);
         Symbol arg2 = symbol.arguments().get(1);
         DataType<?> arg1Type = arg1.valueType();

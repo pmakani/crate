@@ -458,8 +458,8 @@ public abstract class SQLTransportIntegrationTest extends ESIntegTestCase {
             planner.currentClusterState(),
             routingProvider,
             UUID.randomUUID(),
-            planner.functions(),
             coordinatorTxnCtx,
+            analyzer.nodeContext(),
             0,
             null
         );

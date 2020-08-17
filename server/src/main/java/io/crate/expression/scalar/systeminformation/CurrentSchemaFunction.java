@@ -79,7 +79,7 @@ public class CurrentSchemaFunction extends Scalar<String, Object> {
     }
 
     @Override
-    public Symbol normalizeSymbol(Function symbol, @Nullable TransactionContext txnCtx) {
+    public Symbol normalizeSymbol(Function symbol, @Nullable TransactionContext txnCtx, NodeContext nodeCtx) {
         if (txnCtx == null) {
             return Literal.NULL;
         }

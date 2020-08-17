@@ -27,6 +27,7 @@ import io.crate.analyze.relations.FieldProvider;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Schemas;
 import io.crate.metadata.doc.DocTableInfo;
 import io.crate.metadata.table.Operation;
@@ -49,8 +50,9 @@ class RefreshTableAnalyzer {
     public AnalyzedRefreshTable analyze(RefreshStatement<Expression> refreshStatement,
                                         ParamTypeHints paramTypeHints,
                                         CoordinatorTxnCtx txnCtx) {
+        var nodeCtx = new NodeContext(functions);
         var exprAnalyzerWithFieldsAsString = new ExpressionAnalyzer(
-            functions, txnCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
+            txnCtx, nodeCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
         var exprCtx = new ExpressionAnalysisContext();
 
         HashMap<Table<Symbol>, DocTableInfo> analyzedTables = new HashMap<>();

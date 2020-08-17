@@ -84,7 +84,8 @@ public class ExplicitCastFunction extends Scalar<Object, Object> {
 
     @Override
     public Symbol normalizeSymbol(io.crate.expression.symbol.Function symbol,
-                                  TransactionContext txnCtx) {
+                                  TransactionContext txnCtx,
+                                  NodeContext nodeCtx) {
         Symbol argument = symbol.arguments().get(0);
         if (argument.valueType().equals(returnType)) {
             return argument;

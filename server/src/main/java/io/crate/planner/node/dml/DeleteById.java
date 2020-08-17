@@ -27,6 +27,7 @@ import io.crate.data.RowConsumer;
 import io.crate.execution.dml.ShardRequestExecutor;
 import io.crate.execution.dml.delete.ShardDeleteRequest;
 import io.crate.execution.engine.indexing.ShardingUpsertExecutor;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.doc.DocTableInfo;
 import io.crate.planner.DependencyCarrier;
 import io.crate.planner.Plan;
@@ -90,7 +91,7 @@ public class DeleteById implements Plan {
         return new ShardRequestExecutor<>(
             clusterService,
             plannerContext.transactionContext(),
-            dependencies.functions(),
+            new NodeContext(dependencies.functions()),
             table,
             new DeleteRequests(plannerContext.jobId(), requestTimeout),
             dependencies.transportActionProvider().transportShardDeleteAction()::execute,

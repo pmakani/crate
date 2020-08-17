@@ -27,6 +27,7 @@ import io.crate.analyze.expressions.ExpressionAnalyzer;
 import io.crate.analyze.relations.FieldProvider;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.sql.tree.Expression;
 import io.crate.sql.tree.ResetStatement;
 
@@ -44,8 +45,8 @@ public class ResetStatementAnalyzer {
                                           ParamTypeHints typeHints,
                                           CoordinatorTxnCtx txnCtx) {
         var exprAnalyzer = new ExpressionAnalyzer(
-            functions,
             txnCtx,
+            new NodeContext(functions),
             typeHints,
             FieldProvider.FIELDS_AS_LITERAL,
             null
