@@ -968,9 +968,11 @@ not mapped according to their type, which is therefor not guessed as well. You
 can in fact add any value to an added column of the same name. The first value
 added does not determine what you can add further, like with ``dynamic``
 objects.
+Subcolumn definitions inside an ``ignored`` object will behave the same like on
+every other object type, values are validated and indexed (if not disabled).
 
 An object configured like this will simply accept and return the columns
-inserted into it, but otherwise ignore them.
+inserted into it, but otherwise ignore any undefined subcolumn.
 
 ::
 
@@ -991,12 +993,13 @@ inserted into it, but otherwise ignore them.
 .. NOTE::
 
    ``Ignored`` objects should be mainly used for storing and fetching.
-   Filtering by and ordering on them is possible but very performance
-   intensive. ``Ignored`` objects are a *black box* for the storage engine, so
-   the filtering/ordering is done using an expensive table scan and a
-   filter/order function outside of the storage engine. Using ``ignored``
-   objects for grouping or aggregations is not possible at all and will result
-   in an exception or ``NULL`` value if used with excplicit casts.
+   Filtering by and ordering on any undefined subcolumn is possible but very
+   performance intensive. Undefined subcolumns of ``ignored`` objects are a
+   *black box* for the storage engine, so the filtering/ordering is done using
+   an expensive table scan and a filter/order function outside of the storage
+   engine. Using undefined subcolumns of ``ignored`` objects for grouping or
+   aggregations is not possible and will result in an exception unless explicit
+   casted.
 
 .. _data-type-object-literals:
 
