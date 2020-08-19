@@ -2649,7 +2649,7 @@ Example:
 
 The function ``pg_function_is_visible`` returns true for OIDs that refer to a system
 or a user defined function. A function's OID is calculated as a hash over its schema,
-name and argument type list.
+name, and argument type list.
 
 
 Returns: ``boolean``
