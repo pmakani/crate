@@ -40,13 +40,19 @@ import io.crate.types.LongType;
 import io.crate.types.ShortType;
 import io.crate.types.StringType;
 import io.crate.types.TimestampType;
+import org.apache.lucene.index.SortedNumericDocValues;
 import org.apache.lucene.util.NumericUtils;
 import org.elasticsearch.Version;
+import org.elasticsearch.common.CheckedBiConsumer;
 import org.elasticsearch.common.breaker.CircuitBreakingException;
+import org.elasticsearch.index.fielddata.SortedBinaryDocValues;
 import org.elasticsearch.index.mapper.MappedFieldType;
 
+import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static io.crate.metadata.functions.TypeVariableConstraint.typeVariable;
 import static io.crate.types.TypeSignature.parseTypeSignature;
@@ -132,7 +138,7 @@ public final class ArrayAgg extends AggregationFunction<List<Object>, List<Objec
             case LongType.ID:
             case TimestampType.ID_WITH_TZ:
             case TimestampType.ID_WITHOUT_TZ:
-                return new NullAwareSortedNumericDocValueAggregator<>(
+                return new ArrayAggNumericDocValueAggregator<>(
                     fieldTypes.get(0).name(),
                     ArrayList::new,
                     (values, state) -> {
@@ -144,7 +150,7 @@ public final class ArrayAgg extends AggregationFunction<List<Object>, List<Objec
                     }
                 );
             case FloatType.ID:
-                return new NullAwareSortedNumericDocValueAggregator<>(
+                return new ArrayAggNumericDocValueAggregator<>(
                     fieldTypes.get(0).name(),
                     ArrayList::new,
                     (values, state) -> {
@@ -156,7 +162,7 @@ public final class ArrayAgg extends AggregationFunction<List<Object>, List<Objec
                     }
                 );
             case DoubleType.ID:
-                return new NullAwareSortedNumericDocValueAggregator<>(
+                return new ArrayAggNumericDocValueAggregator<>(
                     fieldTypes.get(0).name(),
                     ArrayList::new,
                     (values, state) -> {
@@ -169,7 +175,7 @@ public final class ArrayAgg extends AggregationFunction<List<Object>, List<Objec
                 );
             case IpType.ID:
             case StringType.ID:
-                return new NullAwareBinaryDocValueAggregator<>(
+                return new ArrayAggBinaryDocValueAggregator<>(
                     fieldTypes.get(0).name(),
                     ArrayList::new,
                     (values, state) -> {
@@ -179,10 +185,50 @@ public final class ArrayAgg extends AggregationFunction<List<Object>, List<Objec
                             var value = values.nextValue().utf8ToString();
                             state.add(dataType.sanitizeValue(value));
                         }
-                    }
-                );
+                    });
             default:
                 return null;
+        }
+    }
+
+    public static class ArrayAggNumericDocValueAggregator<T> extends SortedNumericDocValueAggregator<T> {
+
+
+        public ArrayAggNumericDocValueAggregator(String columnName,
+                                                 Supplier<T> stateInitializer,
+                                                 CheckedBiConsumer<SortedNumericDocValues, T, IOException> docValuesConsumer) {
+            super(columnName, stateInitializer, docValuesConsumer);
+        }
+
+        @Override
+        public void apply(T state, int doc) throws IOException {
+            if (values.advanceExact(doc)) {
+                if (values.docValueCount() == 1) {
+                    docValuesConsumer.accept(values, state);
+                }
+            } else {
+                docValuesConsumer.accept(null, state);
+            }
+        }
+    }
+
+    public static class ArrayAggBinaryDocValueAggregator<T> extends BinaryDocValueAggregator<T> {
+
+        public ArrayAggBinaryDocValueAggregator(String columnName,
+                                                Supplier<T> stateInitializer,
+                                                CheckedBiConsumer<SortedBinaryDocValues, T, IOException> docValuesConsumer) {
+            super(columnName, stateInitializer, docValuesConsumer);
+        }
+
+        @Override
+        public void apply(@Nullable T state, int doc) throws IOException {
+            if (values.advanceExact(doc)) {
+                if (values.docValueCount() == 1) {
+                    docValuesConsumer.accept(values, state);
+                }
+            } else {
+                docValuesConsumer.accept(null, state);
+            }
         }
     }
 }

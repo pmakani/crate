@@ -38,7 +38,7 @@ public class BinaryDocValueAggregator<T> implements DocValueAggregator<T> {
 
     private final String columnName;
     private final Supplier<T> stateInitializer;
-    private final CheckedBiConsumer<SortedBinaryDocValues, T, IOException> docValuesConsumer;
+    protected final CheckedBiConsumer<SortedBinaryDocValues, T, IOException> docValuesConsumer;
 
     protected SortedBinaryDocValues values;
 
