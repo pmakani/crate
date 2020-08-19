@@ -45,7 +45,7 @@ public class RefreshAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .enableDefaultTables()
             .addBlobTable("create blob table blobs")
             .build();

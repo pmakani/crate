@@ -45,7 +45,6 @@ import io.crate.analyze.relations.RelationAnalyzer;
 import io.crate.analyze.relations.StatementAnalysisContext;
 import io.crate.auth.user.User;
 import io.crate.auth.user.UserManager;
-import io.crate.common.annotations.VisibleForTesting;
 import io.crate.common.collections.MapBuilder;
 import io.crate.data.Row;
 import io.crate.execution.ddl.RepositoryService;
@@ -58,7 +57,6 @@ import io.crate.expression.udf.UserDefinedFunctionService;
 import io.crate.license.CeLicenseService;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.FulltextAnalyzerResolver;
-import io.crate.metadata.Functions;
 import io.crate.metadata.IndexParts;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.PartitionName;
@@ -159,7 +157,6 @@ import static io.crate.analyze.TableDefinitions.USER_TABLE_MULTI_PK_DEFINITION;
 import static io.crate.analyze.TableDefinitions.USER_TABLE_REFRESH_INTERVAL_BY_ONLY_DEFINITION;
 import static io.crate.blob.v2.BlobIndex.fullIndexName;
 import static io.crate.testing.DiscoveryNodes.newFakeAddress;
-import static io.crate.testing.TestingHelpers.getFunctions;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -172,7 +169,7 @@ import static org.mockito.Mockito.mock;
 /**
  * Lightweight alternative to {@link SQLTransportExecutor}.
  *
- * Can be used for unit-tests testss which don't require the full execution-layer/nodes to be started.
+ * Can be used for unit-tests tests which don't require the full execution-layer/nodes to be started.
  */
 public class SQLExecutor {
 
@@ -183,7 +180,7 @@ public class SQLExecutor {
     private final RelationAnalyzer relAnalyzer;
     private final SessionContext sessionContext;
     private final CoordinatorTxnCtx coordinatorTxnCtx;
-    private final NodeContext nodeCtx;
+    public final NodeContext nodeCtx;
     private final Random random;
     private final Schemas schemas;
     private final FulltextAnalyzerResolver fulltextAnalyzerResolver;
@@ -212,7 +209,7 @@ public class SQLExecutor {
     public static class Builder {
 
         private final ClusterService clusterService;
-        private final Functions functions;
+        private final NodeContext nodeCtx;
         private final AnalysisRegistry analysisRegistry;
         private final CreateTableStatementAnalyzer createTableStatementAnalyzer;
         private final CreateBlobTableAnalyzer createBlobTableAnalyzer;
@@ -230,6 +227,7 @@ public class SQLExecutor {
         private SessionSettingRegistry sessionSettingRegistry = new SessionSettingRegistry(Set.of(loadedRules));
 
         private Builder(ClusterService clusterService,
+                        NodeContext nodeCtx,
                         int numNodes,
                         Random random,
                         List<AnalysisPlugin> analysisPlugins) {
@@ -239,8 +237,8 @@ public class SQLExecutor {
             this.random = random;
             this.clusterService = clusterService;
             addNodesToClusterState(numNodes);
-            functions = getFunctions();
-            UserDefinedFunctionService udfService = new UserDefinedFunctionService(clusterService, functions);
+            this.nodeCtx = nodeCtx;
+            UserDefinedFunctionService udfService = new UserDefinedFunctionService(clusterService, nodeCtx);
             Map<String, SchemaInfo> schemaInfoByName = new HashMap<>();
             CrateSettings crateSettings = new CrateSettings(clusterService, clusterService.getSettings());
             schemaInfoByName.put("sys", new SysSchemaInfo(clusterService, crateSettings, new CeLicenseService()));
@@ -257,13 +255,13 @@ public class SQLExecutor {
 
             Map<RelationName, DocTableInfo> docTables = new HashMap<>();
             DocTableInfoFactory tableInfoFactory = new TestingDocTableInfoFactory(
-                docTables, functions, indexNameExpressionResolver);
+                docTables, nodeCtx, indexNameExpressionResolver);
             ViewInfoFactory testingViewInfoFactory = (ident, state) -> null;
 
             schemas = new Schemas(
                 schemaInfoByName,
                 clusterService,
-                new DocSchemaInfoFactory(tableInfoFactory, testingViewInfoFactory, functions, udfService)
+                new DocSchemaInfoFactory(tableInfoFactory, testingViewInfoFactory, nodeCtx, udfService)
             );
             schemas.start();  // start listen to cluster state changes
 
@@ -278,10 +276,10 @@ public class SQLExecutor {
                 throw new RuntimeException(e);
             }
             fulltextAnalyzerResolver = new FulltextAnalyzerResolver(clusterService, analysisRegistry);
-            createTableStatementAnalyzer = new CreateTableStatementAnalyzer(functions);
+            createTableStatementAnalyzer = new CreateTableStatementAnalyzer(nodeCtx);
             createBlobTableAnalyzer = new CreateBlobTableAnalyzer(
                 schemas,
-                functions
+                nodeCtx
             );
             allocationService = new AllocationService(
                 new AllocationDeciders(
@@ -388,12 +386,12 @@ public class SQLExecutor {
         }
 
         public SQLExecutor build() {
-            RelationAnalyzer relationAnalyzer = new RelationAnalyzer(functions, schemas);
+            RelationAnalyzer relationAnalyzer = new RelationAnalyzer(nodeCtx, schemas);
             return new SQLExecutor(
-                functions,
+                nodeCtx,
                 new Analyzer(
                     schemas,
-                    functions,
+                    nodeCtx,
                     relationAnalyzer,
                     clusterService,
                     analysisRegistry,
@@ -408,7 +406,7 @@ public class SQLExecutor {
                 new Planner(
                     Settings.EMPTY,
                     clusterService,
-                    functions,
+                    nodeCtx,
                     tableStats,
                     null,
                     null,
@@ -450,7 +448,7 @@ public class SQLExecutor {
             BoundCreateTable analyzedStmt = CreateTablePlan.bind(
                 analyzedCreateTable,
                 txnCtx,
-                functions,
+                nodeCtx,
                 Row.EMPTY,
                 SubQueryResults.EMPTY,
                 new NumberOfShards(clusterService),
@@ -508,7 +506,7 @@ public class SQLExecutor {
             BoundCreateTable analyzedStmt = CreateTablePlan.bind(
                 analyzedCreateTable,
                 txnCtx,
-                functions,
+                nodeCtx,
                 Row.EMPTY,
                 SubQueryResults.EMPTY,
                 new NumberOfShards(clusterService),
@@ -586,7 +584,7 @@ public class SQLExecutor {
             Settings settings = CreateBlobTablePlan.buildSettings(
                 analyzedStmt.createBlobTable(),
                 txnCtx,
-                functions,
+                nodeCtx,
                 Row.EMPTY,
                 SubQueryResults.EMPTY,
                 new NumberOfShards(clusterService));
@@ -619,15 +617,16 @@ public class SQLExecutor {
         }
     }
 
-    public static Builder builder(ClusterService clusterService) {
-        return new Builder(clusterService, 1, Randomness.get(), List.of());
+    public static Builder builder(ClusterService clusterService, NodeContext nodeCtx) {
+        return new Builder(clusterService, nodeCtx, 1, Randomness.get(), List.of());
     }
 
     public static Builder builder(ClusterService clusterService,
+                                  NodeContext nodeCtx,
                                   int numNodes,
                                   Random random,
                                   List<AnalysisPlugin> analysisPlugins) {
-        return new Builder(clusterService, numNodes, random, analysisPlugins);
+        return new Builder(clusterService, nodeCtx, numNodes, random, analysisPlugins);
     }
 
     /**
@@ -636,11 +635,11 @@ public class SQLExecutor {
      *
      * <p>Building a cluster state is a rather expensive operation thus this method should NOT be used when multiple
      * tables are needed (e.g. inside a loop) but instead building the cluster state once containing all tables
-     * using {@link #builder(ClusterService)} and afterwards resolve all table infos manually.</p>
+     * using {@link #builder(ClusterService, NodeContext)} and afterwards resolve all table infos manually.</p>
      */
-    public static DocTableInfo tableInfo(RelationName name, String stmt, ClusterService clusterService) {
+    public static DocTableInfo tableInfo(RelationName name, String stmt, ClusterService clusterService, NodeContext nodeCtx) {
         try {
-            SQLExecutor executor = builder(clusterService)
+            SQLExecutor executor = builder(clusterService, nodeCtx)
                 .addTable(stmt)
                 .build();
             return executor.schemas().getTableInfo(name);
@@ -650,11 +649,14 @@ public class SQLExecutor {
     }
 
     /**
-     * Variant of {@link #tableInfo(RelationName, String, ClusterService)} for partitioned tables.
+     * Variant of {@link #tableInfo(RelationName, String, ClusterService, NodeContext)} for partitioned tables.
      */
-    public static DocTableInfo partitionedTableInfo(RelationName name, String stmt, ClusterService clusterService) {
+    public static DocTableInfo partitionedTableInfo(RelationName name,
+                                                    String stmt,
+                                                    ClusterService clusterService,
+                                                    NodeContext nodeCtx) {
         try {
-            SQLExecutor executor = builder(clusterService)
+            SQLExecutor executor = builder(clusterService, nodeCtx)
                 .addPartitionedTable(stmt)
                 .build();
             return executor.schemas().getTableInfo(name);
@@ -663,7 +665,7 @@ public class SQLExecutor {
         }
     }
 
-    private SQLExecutor(Functions functions,
+    private SQLExecutor(NodeContext nodeCtx,
                         Analyzer analyzer,
                         Planner planner,
                         RelationAnalyzer relAnalyzer,
@@ -676,15 +678,10 @@ public class SQLExecutor {
         this.relAnalyzer = relAnalyzer;
         this.sessionContext = sessionContext;
         this.coordinatorTxnCtx = new CoordinatorTxnCtx(sessionContext);
-        this.nodeCtx = new NodeContext(functions);
+        this.nodeCtx = nodeCtx;
         this.schemas = schemas;
         this.random = random;
         this.fulltextAnalyzerResolver = fulltextAnalyzerResolver;
-    }
-
-    @VisibleForTesting
-    public Functions functions() {
-        return nodeCtx.functions();
     }
 
     public FulltextAnalyzerResolver fulltextAnalyzerResolver() {
@@ -760,7 +757,7 @@ public class SQLExecutor {
         if (plan instanceof LogicalPlan) {
             return (T) ((LogicalPlan) plan).build(
                 plannerContext,
-                new ProjectionBuilder(nodeCtx.functions()),
+                new ProjectionBuilder(nodeCtx),
                 TopN.NO_LIMIT,
                 0,
                 null,

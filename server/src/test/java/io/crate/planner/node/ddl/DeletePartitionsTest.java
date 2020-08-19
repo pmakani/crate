@@ -42,7 +42,7 @@ public class DeletePartitionsTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testIndexNameGeneration() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addPartitionedTable(
                 TableDefinitions.PARTED_PKS_TABLE_DEFINITION,
                 new PartitionName(new RelationName("doc", "parted_pks"), singletonList("1395874800000")).asIndexName(),
@@ -52,12 +52,12 @@ public class DeletePartitionsTest extends CrateDummyClusterServiceUnitTest {
 
         Object[] args1 = {"1395874800000"};
         assertThat(
-            plan.getIndices(txnCtx, e.functions(), new RowN(args1), SubQueryResults.EMPTY),
+            plan.getIndices(txnCtx, nodeCtx, new RowN(args1), SubQueryResults.EMPTY),
             Matchers.containsInAnyOrder(".partitioned.parted_pks.04732cpp6ks3ed1o60o30c1g"));
 
         Object[] args2 = {"1395961200000"};
         assertThat(
-            plan.getIndices(txnCtx, e.functions(), new RowN(args2), SubQueryResults.EMPTY),
+            plan.getIndices(txnCtx, nodeCtx, new RowN(args2), SubQueryResults.EMPTY),
             Matchers.containsInAnyOrder(".partitioned.parted_pks.04732cpp6ksjcc9i60o30c1g"));
     }
 

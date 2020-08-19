@@ -39,7 +39,7 @@ public class PlanPrinterTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void setUpExecutor() throws IOException {
-        e = SQLExecutor.builder(clusterService).enableDefaultTables().build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).enableDefaultTables().build();
     }
 
     private Map<String, Object> printPlan(String stmt) {

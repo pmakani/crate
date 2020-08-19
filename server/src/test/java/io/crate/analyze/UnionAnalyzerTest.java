@@ -43,7 +43,7 @@ public class UnionAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        sqlExecutor = SQLExecutor.builder(clusterService)
+        sqlExecutor = SQLExecutor.builder(clusterService, nodeCtx)
             .enableDefaultTables()
             .build();
     }

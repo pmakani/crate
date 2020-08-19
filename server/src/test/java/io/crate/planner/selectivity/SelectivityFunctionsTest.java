@@ -1,5 +1,24 @@
-
-
+/*
+ * Licensed to Crate under one or more contributor license agreements.
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.  Crate licenses this file
+ * to you under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.  You may
+ * obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ * However, if you have executed another commercial license agreement
+ * with Crate these terms will supersede the license and you may use the
+ * software solely pursuant to the terms of the relevant commercial
+ * agreement.
+ */
 
 package io.crate.planner.selectivity;
 
@@ -26,7 +45,7 @@ public class SelectivityFunctionsTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void test_eq_not_in_mcv_is_based_on_approx_distinct() {
-        SqlExpressions expressions = new SqlExpressions(T3.sources(clusterService));
+        SqlExpressions expressions = new SqlExpressions(T3.sources(clusterService), nodeCtx);
         Symbol query = expressions.asSymbol("x = 10");
         var statsByColumn = new HashMap<ColumnIdent, ColumnStats>();
         var numbers = IntStream.range(1, 20_001)
@@ -40,7 +59,7 @@ public class SelectivityFunctionsTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void test_eq_null_value_is_always_0() {
-        SqlExpressions expressions = new SqlExpressions(T3.sources(clusterService));
+        SqlExpressions expressions = new SqlExpressions(T3.sources(clusterService), nodeCtx);
         Symbol query = expressions.asSymbol("x = null");
         var numbers = IntStream.range(1, 50)
             .boxed()
@@ -54,7 +73,7 @@ public class SelectivityFunctionsTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void test_column_eq_column_uses_approx_distinct_for_selectivity_approximation() {
-        SqlExpressions expressions = new SqlExpressions(T3.sources(clusterService));
+        SqlExpressions expressions = new SqlExpressions(T3.sources(clusterService), nodeCtx);
         Symbol query = expressions.asSymbol("x = y");
         var numbers = Lists2.concat(
             List.of(1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 10, 10, 10, 10, 10, 10, 10, 10),
@@ -68,7 +87,7 @@ public class SelectivityFunctionsTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void test_eq_value_that_is_present_in_mcv_uses_mcv_frequency_as_selectivity() {
-        SqlExpressions expressions = new SqlExpressions(T3.sources(clusterService));
+        SqlExpressions expressions = new SqlExpressions(T3.sources(clusterService), nodeCtx);
         Symbol query = expressions.asSymbol("x = ?");
         var numbers = Lists2.concat(
             List.of(1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 10, 10, 10, 10, 10, 10, 10, 10),
@@ -85,7 +104,7 @@ public class SelectivityFunctionsTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void test_not_reverses_selectivity_of_inner_function() {
-        SqlExpressions expressions = new SqlExpressions(T3.sources(clusterService));
+        SqlExpressions expressions = new SqlExpressions(T3.sources(clusterService), nodeCtx);
         Symbol query = expressions.asSymbol("NOT (x = 10)");
         var numbers = IntStream.range(1, 20_001)
             .boxed()
@@ -97,7 +116,7 @@ public class SelectivityFunctionsTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void test_col_is_null_uses_null_fraction_as_selectivity() {
-        SqlExpressions expressions = new SqlExpressions(T3.sources(clusterService));
+        SqlExpressions expressions = new SqlExpressions(T3.sources(clusterService), nodeCtx);
         Symbol query = expressions.asSymbol("x is null");
         var columnStats = ColumnStats.fromSortedValues(List.of(1, 2), DataTypes.INTEGER, 2, 4);
         assertThat(columnStats.nullFraction(), Matchers.is(0.5));

@@ -35,7 +35,7 @@ public class DropViewAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testDropViewContainsIfExistsAndEmptyViews() {
-        SQLExecutor e = SQLExecutor.builder(clusterService).build();
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx).build();
 
         AnalyzedDropView dropView = e.analyze("drop view if exists v1, v2, x.v3");
 
@@ -45,7 +45,7 @@ public class DropViewAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testDropViewRaisesRelationsUnkownForMissingView() {
-        SQLExecutor e = SQLExecutor.builder(clusterService).build();
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx).build();
 
         expectedException.expect(RelationsUnknown.class);
         expectedException.expectMessage("Relations not found: doc.v1, doc.v2");

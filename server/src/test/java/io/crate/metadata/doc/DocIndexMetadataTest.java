@@ -14,7 +14,6 @@ import io.crate.expression.udf.UserDefinedFunctionService;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.FulltextAnalyzerResolver;
-import io.crate.metadata.Functions;
 import io.crate.metadata.GeneratedReference;
 import io.crate.metadata.IndexReference;
 import io.crate.metadata.Reference;
@@ -63,7 +62,6 @@ import java.util.stream.Collectors;
 import static io.crate.testing.SymbolMatchers.isFunction;
 import static io.crate.testing.SymbolMatchers.isLiteral;
 import static io.crate.testing.SymbolMatchers.isReference;
-import static io.crate.testing.TestingHelpers.getFunctions;
 import static java.util.Collections.emptyMap;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -79,7 +77,6 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 // @formatter:off
 public class DocIndexMetadataTest extends CrateDummyClusterServiceUnitTest {
 
-    private Functions functions;
     private UserDefinedFunctionService udfService;
 
     private IndexMetadata getIndexMetadata(String indexName,
@@ -99,13 +96,12 @@ public class DocIndexMetadataTest extends CrateDummyClusterServiceUnitTest {
     }
 
     private DocIndexMetadata newMeta(IndexMetadata metadata, String name) throws IOException {
-        return new DocIndexMetadata(functions, metadata, new RelationName(Schemas.DOC_SCHEMA_NAME, name)).build();
+        return new DocIndexMetadata(nodeCtx, metadata, new RelationName(Schemas.DOC_SCHEMA_NAME, name)).build();
     }
 
     @Before
     public void setupUdfService() {
-        functions = getFunctions();
-        udfService = new UserDefinedFunctionService(clusterService, functions);
+        udfService = new UserDefinedFunctionService(clusterService, nodeCtx);
     }
 
     @Test
@@ -1064,16 +1060,16 @@ public class DocIndexMetadataTest extends CrateDummyClusterServiceUnitTest {
         Statement statement = SqlParser.createStatement(stmt);
 
         DocTableInfoFactory docTableInfoFactory = new InternalDocTableInfoFactory(
-            functions,
+            nodeCtx,
             new IndexNameExpressionResolver()
         );
         ViewInfoFactory viewInfoFactory = (ident, state) -> null;
-        DocSchemaInfo docSchemaInfo = new DocSchemaInfo(Schemas.DOC_SCHEMA_NAME, clusterService, functions, udfService, viewInfoFactory, docTableInfoFactory );
+        DocSchemaInfo docSchemaInfo = new DocSchemaInfo(Schemas.DOC_SCHEMA_NAME, clusterService, nodeCtx, udfService, viewInfoFactory, docTableInfoFactory );
         Path homeDir = createTempDir();
         Schemas schemas = new Schemas(
                 Map.of("doc", docSchemaInfo),
                 clusterService,
-                new DocSchemaInfoFactory(docTableInfoFactory, viewInfoFactory, functions, udfService));
+                new DocSchemaInfoFactory(docTableInfoFactory, viewInfoFactory, nodeCtx, udfService));
         FulltextAnalyzerResolver fulltextAnalyzerResolver = new FulltextAnalyzerResolver(
             clusterService,
             new AnalysisRegistry(
@@ -1093,7 +1089,7 @@ public class DocIndexMetadataTest extends CrateDummyClusterServiceUnitTest {
                 emptyMap()
             ));
 
-        CreateTableStatementAnalyzer analyzer = new CreateTableStatementAnalyzer(functions);
+        CreateTableStatementAnalyzer analyzer = new CreateTableStatementAnalyzer(nodeCtx);
 
         Analysis analysis = new Analysis(new CoordinatorTxnCtx(SessionContext.systemSessionContext()), ParamTypeHints.EMPTY);
         CoordinatorTxnCtx txnCtx = new CoordinatorTxnCtx(SessionContext.systemSessionContext());
@@ -1104,7 +1100,7 @@ public class DocIndexMetadataTest extends CrateDummyClusterServiceUnitTest {
         BoundCreateTable analyzedStatement = CreateTablePlan.bind(
             analyzedCreateTable,
             txnCtx,
-            functions,
+            nodeCtx,
             Row.EMPTY,
             SubQueryResults.EMPTY,
             new NumberOfShards(clusterService),

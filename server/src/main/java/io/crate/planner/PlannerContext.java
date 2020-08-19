@@ -26,7 +26,6 @@ import io.crate.action.sql.SessionContext;
 import io.crate.analyze.WhereClause;
 import io.crate.data.Row;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.Routing;
 import io.crate.metadata.RoutingProvider;
@@ -130,10 +129,6 @@ public class PlannerContext {
 
     public ReaderAllocations buildReaderAllocations() {
         return routingBuilder.buildReaderAllocations();
-    }
-
-    public Functions functions() {
-        return nodeCtx.functions();
     }
 
     public NodeContext nodeContext() {

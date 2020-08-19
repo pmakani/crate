@@ -27,7 +27,6 @@ import io.crate.analyze.relations.FieldProvider;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.FulltextAnalyzerResolver;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.sql.tree.AnalyzerElement;
 import io.crate.sql.tree.CharFilters;
@@ -49,12 +48,12 @@ import java.util.Map;
 class CreateAnalyzerStatementAnalyzer {
 
     private final FulltextAnalyzerResolver ftResolver;
-    private final Functions functions;
+    private final NodeContext nodeCtx;
 
     CreateAnalyzerStatementAnalyzer(FulltextAnalyzerResolver ftResolver,
-                                    Functions functions) {
+                                    NodeContext nodeCtx) {
         this.ftResolver = ftResolver;
-        this.functions = functions;
+        this.nodeCtx = nodeCtx;
     }
 
     private static class Context {
@@ -110,7 +109,7 @@ class CreateAnalyzerStatementAnalyzer {
 
         var context = new Context(
             transactionContext,
-            new NodeContext(functions),
+            nodeCtx,
             paramTypeHints
         );
 

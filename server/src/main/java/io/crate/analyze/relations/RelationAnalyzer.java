@@ -54,7 +54,6 @@ import io.crate.expression.tablefunctions.TableFunctionFactory;
 import io.crate.expression.tablefunctions.ValuesFunction;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.FunctionImplementation;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.Schemas;
@@ -110,7 +109,7 @@ import java.util.Optional;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, StatementAnalysisContext> {
 
-    private final Functions functions;
+    private final NodeContext nodeCtx;
     private final Schemas schemas;
 
     private static final List<Relation> EMPTY_ROW_TABLE_RELATION = ImmutableList.of(
@@ -118,8 +117,8 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
     );
 
     @Inject
-    public RelationAnalyzer(Functions functions, Schemas schemas) {
-        this.functions = functions;
+    public RelationAnalyzer(NodeContext nodeCtx, Schemas schemas) {
+        this.nodeCtx = nodeCtx;
         this.schemas = schemas;
     }
 
@@ -151,7 +150,6 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
 
         List<Symbol> childRelationFields = childRelation.outputs();
         var coordinatorTxnCtx = statementContext.transactionContext();
-        var nodeCtx = new NodeContext(functions);
         ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
             coordinatorTxnCtx,
             nodeCtx,
@@ -172,7 +170,7 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
         }
 
         var normalizer = EvaluatingNormalizer.functionOnlyNormalizer(
-            functions,
+            nodeCtx,
             f -> expressionAnalysisContext.isEagerNormalizationAllowed() && f.isDeterministic()
         );
 
@@ -267,7 +265,7 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
                 final CoordinatorTxnCtx coordinatorTxnCtx = statementContext.transactionContext();
                 ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
                     coordinatorTxnCtx,
-                    new NodeContext(functions),
+                    nodeCtx,
                     statementContext.paramTyeHints(),
                     new FullQualifiedNameFieldProvider(
                         relationContext.sources(),
@@ -322,7 +320,7 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
         CoordinatorTxnCtx coordinatorTxnCtx = statementContext.transactionContext();
         ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
             coordinatorTxnCtx,
-            new NodeContext(functions),
+            nodeCtx,
             statementContext.paramTyeHints(),
             new FullQualifiedNameFieldProvider(
                 context.sources(),
@@ -354,7 +352,7 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
         WhereClauseValidator.validate(where);
 
         var normalizer = EvaluatingNormalizer.functionOnlyNormalizer(
-            functions,
+            nodeCtx,
             f -> expressionAnalysisContext.isEagerNormalizationAllowed() && f.isDeterministic()
         );
 
@@ -629,7 +627,7 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
         RelationAnalysisContext context = statementContext.currentRelationContext();
         ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
             statementContext.transactionContext(),
-            new NodeContext(functions),
+            nodeCtx,
             statementContext.paramTyeHints(),
             FieldProvider.UNSUPPORTED,
             null
@@ -650,7 +648,7 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
                     "Symbol '%s' is not supported in FROM clause", node.name()));
         }
         Function function = (Function) symbol;
-        FunctionImplementation functionImplementation = functions.getQualified(
+        FunctionImplementation functionImplementation = nodeCtx.functions().getQualified(
             function,
             statementContext.sessionContext().searchPath()
         );
@@ -673,7 +671,7 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
     public AnalyzedRelation visitValues(Values values, StatementAnalysisContext context) {
         var expressionAnalyzer = new ExpressionAnalyzer(
             context.transactionContext(),
-            new NodeContext(functions),
+            nodeCtx,
             context.paramTyeHints(),
             FieldProvider.UNSUPPORTED,
             new SubqueryAnalyzer(this, context)
@@ -733,7 +731,7 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
         }
 
         var normalizer = EvaluatingNormalizer.functionOnlyNormalizer(
-            functions,
+            nodeCtx,
             f -> f.isDeterministic()
         );
 
@@ -751,7 +749,7 @@ public class RelationAnalyzer extends DefaultTraversalVisitor<AnalyzedRelation, 
                 arrayType
             ));
         }
-        FunctionImplementation implementation = functions.getQualified(
+        FunctionImplementation implementation = nodeCtx.functions().getQualified(
             ValuesFunction.SIGNATURE,
             Symbols.typeView(arrays),
             RowType.EMPTY

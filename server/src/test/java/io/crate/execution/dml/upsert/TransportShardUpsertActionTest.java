@@ -27,7 +27,7 @@ import io.crate.execution.ddl.SchemaUpdateClient;
 import io.crate.execution.dml.ShardResponse;
 import io.crate.execution.dml.upsert.ShardUpsertRequest.DuplicateKeyAction;
 import io.crate.execution.jobs.TasksService;
-import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.PartitionName;
 import io.crate.metadata.Reference;
 import io.crate.metadata.ReferenceIdent;
@@ -71,7 +71,6 @@ import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static io.crate.testing.TestingHelpers.getFunctions;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -108,11 +107,11 @@ public class TransportShardUpsertActionTest extends CrateDummyClusterServiceUnit
                                                  TasksService tasksService,
                                                  IndicesService indicesService,
                                                  ShardStateAction shardStateAction,
-                                                 Functions functions,
+                                                 NodeContext nodeCtx,
                                                  Schemas schemas,
                                                  IndexNameExpressionResolver indexNameExpressionResolver) {
             super(threadPool, clusterService, transportService, schemaUpdateClient,
-                tasksService, indicesService, shardStateAction, functions, schemas, indexNameExpressionResolver);
+                tasksService, indicesService, shardStateAction, nodeCtx, schemas, indexNameExpressionResolver);
         }
 
         @Override
@@ -134,7 +133,6 @@ public class TransportShardUpsertActionTest extends CrateDummyClusterServiceUnit
 
     @Before
     public void prepare() throws Exception {
-        Functions functions = getFunctions();
 
         charactersIndexUUID = UUIDs.randomBase64UUID();
         partitionIndexUUID = UUIDs.randomBase64UUID();
@@ -156,16 +154,16 @@ public class TransportShardUpsertActionTest extends CrateDummyClusterServiceUnit
         when(schemas.getTableInfo(any(RelationName.class), eq(Operation.INSERT))).thenReturn(tableInfo);
 
         transportShardUpsertAction = new TestingTransportShardUpsertAction(
-            mock(ThreadPool.class),
-            clusterService,
-            MockTransportService.createNewService(Settings.EMPTY, Version.ES_V_6_5_1, THREAD_POOL, clusterService.getClusterSettings()),
-            mock(SchemaUpdateClient.class),
-            mock(TasksService.class),
-            indicesService,
-            mock(ShardStateAction.class),
-            functions,
-            schemas,
-            mock(IndexNameExpressionResolver.class)
+                mock(ThreadPool.class),
+                clusterService,
+                MockTransportService.createNewService(Settings.EMPTY, Version.ES_V_6_5_1, THREAD_POOL, clusterService.getClusterSettings()),
+                mock(SchemaUpdateClient.class),
+                mock(TasksService.class),
+                indicesService,
+                mock(ShardStateAction.class),
+                nodeCtx,
+                schemas,
+                mock(IndexNameExpressionResolver.class)
         );
     }
 

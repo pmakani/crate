@@ -51,7 +51,7 @@ public class OidHashTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws Exception {
-        t1Info = SQLExecutor.tableInfo(T1, T1_DEFINITION, clusterService);
+        t1Info = SQLExecutor.tableInfo(T1, T1_DEFINITION, clusterService, nodeCtx);
     }
 
     @Test

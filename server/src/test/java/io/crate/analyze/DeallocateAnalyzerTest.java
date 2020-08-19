@@ -38,7 +38,7 @@ public class DeallocateAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() {
-        e = SQLExecutor.builder(clusterService).build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).build();
     }
 
     @Test

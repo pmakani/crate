@@ -47,7 +47,7 @@ public class QuerySplitterTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws Exception {
-        expressions = new SqlExpressions(T3.sources(clusterService));
+        expressions = new SqlExpressions(T3.sources(clusterService), nodeCtx);
     }
 
     private Symbol asSymbol(String expression) {

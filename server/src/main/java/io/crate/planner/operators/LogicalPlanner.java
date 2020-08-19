@@ -34,6 +34,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import io.crate.metadata.NodeContext;
 import org.elasticsearch.Version;
 
 import io.crate.analyze.AnalyzedInsertStatement;
@@ -68,7 +69,6 @@ import io.crate.expression.symbol.ScopedSymbol;
 import io.crate.expression.symbol.SelectSymbol;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.Reference;
 import io.crate.metadata.TransactionContext;
 import io.crate.planner.DependencyCarrier;
@@ -116,9 +116,9 @@ public class LogicalPlanner {
     private final Optimizer writeOptimizer;
     private final Optimizer fetchOptimizer;
 
-    public LogicalPlanner(Functions functions, TableStats tableStats, Supplier<Version> minNodeVersionInCluster, LoadedRules loadedRules) {
+    public LogicalPlanner(NodeContext nodeCtx, TableStats tableStats, Supplier<Version> minNodeVersionInCluster, LoadedRules loadedRules) {
         this.optimizer = new Optimizer(
-            functions,
+            nodeCtx,
             minNodeVersionInCluster,
             loadedRules.rules(
                 List.of(
@@ -147,14 +147,14 @@ public class LogicalPlanner {
             )
         );
         this.fetchOptimizer = new Optimizer(
-            functions,
+            nodeCtx,
             minNodeVersionInCluster,
             loadedRules.rules(
                 List.of(RewriteToQueryThenFetch.class)
             )
         );
         this.writeOptimizer = new Optimizer(
-            functions,
+            nodeCtx,
             minNodeVersionInCluster,
             loadedRules.rules(
                 List.of(RewriteInsertFromSubQueryToInsertFromValues.class)

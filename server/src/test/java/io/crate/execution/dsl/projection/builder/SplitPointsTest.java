@@ -43,7 +43,7 @@ public class SplitPointsTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void setUpExecutor() throws Exception {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable(T3.T1_DEFINITION)
             .addTable("create table t2 (x int, xs array(integer))")
             .build();

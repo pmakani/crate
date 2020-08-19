@@ -53,7 +53,6 @@ import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.Symbol;
 import io.crate.memory.OnHeapMemoryManager;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.RowGranularity;
 import io.crate.metadata.SearchPath;
 import io.crate.metadata.TransactionContext;
@@ -76,7 +75,6 @@ import java.util.UUID;
 
 import static com.carrotsearch.randomizedtesting.RandomizedTest.$;
 import static io.crate.data.SentinelRow.SENTINEL;
-import static io.crate.testing.TestingHelpers.getFunctions;
 import static io.crate.testing.TestingHelpers.isRow;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.instanceOf;
@@ -87,7 +85,6 @@ public class ProjectionToProjectorVisitorTest extends CrateDummyClusterServiceUn
 
     private ProjectionToProjectorVisitor visitor;
     private Signature avgSignature;
-    private Functions functions;
     private TransactionContext txnCtx = CoordinatorTxnCtx.systemTransactionContext();
 
     private OnHeapMemoryManager memoryManager;
@@ -95,16 +92,15 @@ public class ProjectionToProjectorVisitorTest extends CrateDummyClusterServiceUn
     @Before
     public void prepare() {
         MockitoAnnotations.initMocks(this);
-        functions = getFunctions();
         visitor = new ProjectionToProjectorVisitor(
             clusterService,
             new NodeJobsCounter(),
-            functions,
+            nodeCtx,
             THREAD_POOL,
             Settings.EMPTY,
             mock(TransportActionProvider.class, Answers.RETURNS_DEEP_STUBS),
-            new InputFactory(functions),
-            EvaluatingNormalizer.functionOnlyNormalizer(functions),
+            new InputFactory(nodeCtx),
+            EvaluatingNormalizer.functionOnlyNormalizer(nodeCtx),
             t -> null,
             t -> null
         );
@@ -254,7 +250,7 @@ public class ProjectionToProjectorVisitorTest extends CrateDummyClusterServiceUn
     public void testFilterProjection() throws Exception {
         List<Symbol> arguments = Arrays.asList(Literal.of(2), new InputColumn(1));
         EqOperator op =
-            (EqOperator) functions.get(null, EqOperator.NAME, arguments, SearchPath.pathWithPGCatalogAndDoc());
+            (EqOperator) nodeCtx.functions().get(null, EqOperator.NAME, arguments, SearchPath.pathWithPGCatalogAndDoc());
         Function function = new Function(op.signature(), arguments, EqOperator.RETURN_TYPE);
         FilterProjection projection = new FilterProjection(function,
             Arrays.asList(new InputColumn(0), new InputColumn(1)));

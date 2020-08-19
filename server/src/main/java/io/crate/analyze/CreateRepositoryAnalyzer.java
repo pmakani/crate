@@ -28,7 +28,6 @@ import io.crate.exceptions.RepositoryAlreadyExistsException;
 import io.crate.execution.ddl.RepositoryService;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.sql.tree.CreateRepository;
 import io.crate.sql.tree.Expression;
@@ -37,11 +36,11 @@ import io.crate.sql.tree.GenericProperties;
 class CreateRepositoryAnalyzer {
 
     private final RepositoryService repositoryService;
-    private final Functions functions;
+    private final NodeContext nodeCtx;
 
-    CreateRepositoryAnalyzer(RepositoryService repositoryService, Functions functions) {
+    CreateRepositoryAnalyzer(RepositoryService repositoryService, NodeContext nodeCtx) {
         this.repositoryService = repositoryService;
-        this.functions = functions;
+        this.nodeCtx = nodeCtx;
     }
 
     public AnalyzedCreateRepository analyze(CreateRepository<Expression> createRepository,
@@ -52,7 +51,6 @@ class CreateRepositoryAnalyzer {
             throw new RepositoryAlreadyExistsException(repositoryName);
         }
 
-        var nodeCtx = new NodeContext(functions);
         var exprAnalyzerWithFieldsAsString = new ExpressionAnalyzer(
             txnCtx, nodeCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
         var exprCtx = new ExpressionAnalysisContext();

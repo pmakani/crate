@@ -43,7 +43,6 @@ import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.Symbol;
 import io.crate.memory.OnHeapMemoryManager;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.RowGranularity;
 import io.crate.metadata.SearchPath;
 import io.crate.metadata.TransactionContext;
@@ -66,13 +65,11 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static io.crate.data.SentinelRow.SENTINEL;
-import static io.crate.testing.TestingHelpers.getFunctions;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 
 public class ProjectingRowConsumerTest extends CrateDummyClusterServiceUnitTest {
 
-    private Functions functions;
     private ProjectorFactory projectorFactory;
     private TransactionContext txnCtx = CoordinatorTxnCtx.systemTransactionContext();
     private OnHeapMemoryManager memoryManager;
@@ -80,18 +77,17 @@ public class ProjectingRowConsumerTest extends CrateDummyClusterServiceUnitTest 
 
     @Before
     public void prepare() {
-        functions = getFunctions();
         memoryManager = new OnHeapMemoryManager(usedBytes -> {});
         projectorFactory = new ProjectionToProjectorVisitor(
             clusterService,
             new NodeJobsCounter(),
-            functions,
+            nodeCtx,
             THREAD_POOL,
             Settings.EMPTY,
             mock(TransportActionProvider.class, Answers.RETURNS_DEEP_STUBS),
-            new InputFactory(functions),
+            new InputFactory(nodeCtx),
             new EvaluatingNormalizer(
-                functions,
+                nodeCtx,
                 RowGranularity.SHARD,
                 r -> Literal.ofUnchecked(r.valueType(), r.valueType().implicitCast("1")),
                 null),
@@ -129,7 +125,7 @@ public class ProjectingRowConsumerTest extends CrateDummyClusterServiceUnitTest 
     public void testConsumerRequiresScrollAndProjectorsDontSupportScrolling() {
         List<Symbol> arguments = Arrays.asList(Literal.of(2), new InputColumn(1, DataTypes.INTEGER));
         EqOperator op =
-            (EqOperator) functions.get(null, EqOperator.NAME, arguments, SearchPath.pathWithPGCatalogAndDoc());
+            (EqOperator) nodeCtx.functions().get(null, EqOperator.NAME, arguments, SearchPath.pathWithPGCatalogAndDoc());
         Function function = new Function(op.signature(), arguments, EqOperator.RETURN_TYPE);
         FilterProjection filterProjection = new FilterProjection(function,
             Arrays.asList(new InputColumn(0), new InputColumn(1)));

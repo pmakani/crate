@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 
 import static io.crate.testing.SymbolMatchers.isLiteral;
-import static io.crate.testing.TestingHelpers.getFunctions;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.notNullValue;
@@ -52,8 +51,8 @@ public class EqualityExtractorTest extends CrateDummyClusterServiceUnitTest {
 
     private CoordinatorTxnCtx coordinatorTxnCtx = new CoordinatorTxnCtx(SessionContext.systemSessionContext());
     private SqlExpressions expressions;
-    private EvaluatingNormalizer normalizer = EvaluatingNormalizer.functionOnlyNormalizer(getFunctions());
-    private EqualityExtractor ee = new EqualityExtractor(normalizer);
+    private EvaluatingNormalizer normalizer;
+    private EqualityExtractor ee;
     private ColumnIdent x = new ColumnIdent("x");
     private ColumnIdent i = new ColumnIdent("i");
 
@@ -62,7 +61,9 @@ public class EqualityExtractorTest extends CrateDummyClusterServiceUnitTest {
         Map<RelationName, AnalyzedRelation> sources = T3.sources(List.of(T3.T1), clusterService);
 
         DocTableRelation tr1 = (DocTableRelation) sources.get(T3.T1);
-        expressions = new SqlExpressions(sources, tr1);
+        expressions = new SqlExpressions(sources, nodeCtx, tr1);
+        normalizer = EvaluatingNormalizer.functionOnlyNormalizer(nodeCtx);
+        ee = new EqualityExtractor(normalizer);
     }
 
     private List<List<Symbol>> analyzeParentX(Symbol query) {
@@ -383,7 +384,7 @@ public class EqualityExtractorTest extends CrateDummyClusterServiceUnitTest {
     public void test_primary_key_extraction_on_subscript_with_any() {
         Map<RelationName, AnalyzedRelation> sources = T3.sources(List.of(T3.T4), clusterService);
         DocTableRelation tr4 = (DocTableRelation) sources.get(T3.T4);
-        var expressionsT4 = new SqlExpressions(sources, tr4);
+        var expressionsT4 = new SqlExpressions(sources, nodeCtx, tr4);
         var pkCol = new ColumnIdent("obj");
 
         var query = expressionsT4.normalize(expressionsT4.asSymbol("obj = any([{i = 1}])"));

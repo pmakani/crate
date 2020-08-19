@@ -54,7 +54,6 @@ import io.crate.expression.symbol.Symbol;
 import io.crate.expression.symbol.Symbols;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.GeneratedReference;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
@@ -74,7 +73,7 @@ import io.crate.types.DataTypes;
 
 class InsertAnalyzer {
 
-    private final Functions functions;
+    private final NodeContext nodeCtx;
     private final Schemas schemas;
     private final RelationAnalyzer relationAnalyzer;
 
@@ -100,8 +99,8 @@ class InsertAnalyzer {
         }
     }
 
-    InsertAnalyzer(Functions functions, Schemas schemas, RelationAnalyzer relationAnalyzer) {
-        this.functions = functions;
+    InsertAnalyzer(NodeContext nodeCtx, Schemas schemas, RelationAnalyzer relationAnalyzer) {
+        this.nodeCtx = nodeCtx;
         this.schemas = schemas;
         this.relationAnalyzer = relationAnalyzer;
     }
@@ -125,7 +124,6 @@ class InsertAnalyzer {
 
         DocTableRelation tableRelation = new DocTableRelation(tableInfo);
         NameFieldProvider fieldProvider = new NameFieldProvider(tableRelation);
-        NodeContext nodeCtx = new NodeContext(functions);
         ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(
             txnCtx,
             nodeCtx,
@@ -332,7 +330,7 @@ class InsertAnalyzer {
             fieldProvider = new NameFieldProvider(targetTable);
         }
         var expressionAnalyzer = new ExpressionAnalyzer(txnCtx, nodeCtx, paramTypeHints, fieldProvider, null);
-        var normalizer = new EvaluatingNormalizer(nodeCtx.functions(), RowGranularity.CLUSTER, null, targetTable);
+        var normalizer = new EvaluatingNormalizer(nodeCtx, RowGranularity.CLUSTER, null, targetTable);
         Map<Reference, Symbol> updateAssignments = new HashMap<>(duplicateKeyContext.getAssignments().size());
         for (Assignment<Expression> assignment : duplicateKeyContext.getAssignments()) {
             Reference targetCol = (Reference) exprAnalyzer.convert(assignment.columnName(), exprCtx);

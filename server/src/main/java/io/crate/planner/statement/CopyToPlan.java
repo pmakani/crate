@@ -45,7 +45,6 @@ import io.crate.expression.symbol.format.Style;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.DocReferences;
-import io.crate.metadata.Functions;
 import io.crate.metadata.GeneratedReference;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
@@ -133,7 +132,7 @@ public final class CopyToPlan implements Plan {
         var boundedCopyTo = bind(
             copyTo,
             context.transactionContext(),
-            context.functions(),
+            context.nodeContext(),
             params,
             subQueryResults);
 
@@ -177,7 +176,7 @@ public final class CopyToPlan implements Plan {
                                                          match.captures(),
                                                          tableStats,
                                                          context.transactionContext(),
-                                                         context.functions());
+                                                         context.nodeContext());
             return plan == null ? collect : plan;
         }
         return collect;
@@ -186,12 +185,12 @@ public final class CopyToPlan implements Plan {
     @VisibleForTesting
     public static BoundCopyTo bind(AnalyzedCopyTo copyTo,
                                    CoordinatorTxnCtx txnCtx,
-                                   Functions functions,
+                                   NodeContext nodeCtx,
                                    Row parameters,
                                    SubQueryResults subQueryResults) {
         Function<? super Symbol, Object> eval = x -> SymbolEvaluator.evaluate(
             txnCtx,
-            new NodeContext(functions),
+            nodeCtx,
             x,
             parameters,
             subQueryResults

@@ -37,7 +37,7 @@ public class OuterJoinRewriteTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void setup() throws IOException {
-        sqlExecutor = SQLExecutor.builder(clusterService)
+        sqlExecutor = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t1 (x int)")
             .addTable("create table t2 (x int)")
             .build();

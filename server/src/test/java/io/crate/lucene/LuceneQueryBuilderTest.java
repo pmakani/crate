@@ -48,6 +48,7 @@ public abstract class LuceneQueryBuilderTest extends CrateDummyClusterServiceUni
             createTempDir(),
             THREAD_POOL,
             clusterService,
+            nodeCtx,
             indexVersion(),
             "create table users (" +
             " name string," +

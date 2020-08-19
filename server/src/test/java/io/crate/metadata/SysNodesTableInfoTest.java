@@ -73,7 +73,7 @@ public class SysNodesTableInfoTest extends CrateDummyClusterServiceUnitTest {
         Reference ref = table.getReference(new ColumnIdent("fs", List.of("data", "path")));
         assertThat(ref.valueType(), is(new ArrayType<>(DataTypes.STRING)));
 
-        SQLExecutor e = SQLExecutor.builder(clusterService).build();
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx).build();
         AnalyzedRelation statement = e.analyze("select fs['data']['path'] from sys.nodes");
         assertThat(statement.outputs().get(0).valueType(), is(new ArrayType<>(DataTypes.STRING)));
     }

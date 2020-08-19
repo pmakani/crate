@@ -29,7 +29,6 @@ import io.crate.testing.SQLExecutor;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.crate.testing.SymbolMatchers.isField;
 import static io.crate.testing.SymbolMatchers.isFunction;
 import static io.crate.testing.SymbolMatchers.isLiteral;
 import static io.crate.testing.SymbolMatchers.isReference;
@@ -42,7 +41,7 @@ public class AggregateExpressionAnalyzerTest extends CrateDummyClusterServiceUni
 
     @Before
     public void setUpExecutor() throws Exception {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (x int)")
             .build();
     }

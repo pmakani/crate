@@ -56,7 +56,7 @@ public class AlterTableAddColumnAnalyzerTest extends CrateDummyClusterServiceUni
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .enableDefaultTables()
             .addTable("create table nested_pks (" +
                       "     pk object as (a int, b object as (c int))," +
@@ -72,7 +72,7 @@ public class AlterTableAddColumnAnalyzerTest extends CrateDummyClusterServiceUni
         return AlterTableAddColumnPlan.bind(
             e.analyze(stmt),
             plannerContext.transactionContext(),
-            plannerContext.functions(),
+            plannerContext.nodeContext(),
             Row.EMPTY,
             SubQueryResults.EMPTY,
             e.fulltextAnalyzerResolver()

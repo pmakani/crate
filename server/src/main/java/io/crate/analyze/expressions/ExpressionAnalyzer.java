@@ -222,7 +222,7 @@ public class ExpressionAnalyzer {
     public Symbol convert(Expression expression, ExpressionAnalysisContext expressionAnalysisContext) {
         var symbol = expression.accept(innerAnalyzer, expressionAnalysisContext);
         var normalizer = EvaluatingNormalizer.functionOnlyNormalizer(
-            nodeCtx.functions(),
+            nodeCtx,
             f -> expressionAnalysisContext.isEagerNormalizationAllowed() && f.isDeterministic()
         );
         return normalizer.normalize(symbol, coordinatorTxnCtx);

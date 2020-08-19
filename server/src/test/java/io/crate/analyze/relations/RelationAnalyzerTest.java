@@ -41,7 +41,7 @@ public class RelationAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        executor = SQLExecutor.builder(clusterService).enableDefaultTables().build();
+        executor = SQLExecutor.builder(clusterService, nodeCtx).enableDefaultTables().build();
     }
 
     @Test

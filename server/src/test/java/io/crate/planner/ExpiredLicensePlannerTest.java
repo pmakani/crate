@@ -45,7 +45,7 @@ public class ExpiredLicensePlannerTest extends CrateDummyClusterServiceUnitTest 
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable(USER_TABLE_DEFINITION)
             .addTable(T3.T1_DEFINITION)
             .addTable(T3.T2_DEFINITION)

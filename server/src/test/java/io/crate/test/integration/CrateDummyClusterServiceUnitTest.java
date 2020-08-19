@@ -22,6 +22,7 @@
 
 package io.crate.test.integration;
 
+import io.crate.metadata.NodeContext;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.ClusterState;
@@ -51,6 +52,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static io.crate.testing.TestingHelpers.createNodeContext;
 import static org.elasticsearch.test.ClusterServiceUtils.createClusterStatePublisher;
 import static org.elasticsearch.test.ClusterServiceUtils.createNoOpNodeConnectionsService;
 
@@ -63,6 +65,7 @@ public class CrateDummyClusterServiceUnitTest extends ESTestCase {
 
     protected static ThreadPool THREAD_POOL;
     protected ClusterService clusterService;
+    protected NodeContext nodeCtx;
 
     @BeforeClass
     public static void setupThreadPool() {
@@ -77,6 +80,7 @@ public class CrateDummyClusterServiceUnitTest extends ESTestCase {
     @Before
     public void setupDummyClusterService() {
         clusterService = createClusterService(additionalClusterSettings(), Version.CURRENT);
+        nodeCtx = createNodeContext();
     }
 
     @After

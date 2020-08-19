@@ -158,7 +158,7 @@ public class SchemasTest extends CrateDummyClusterServiceUnitTest {
     }
 
     private SQLExecutor.Builder getSqlExecutorBuilderForTable(RelationName tableIdent, String... searchPath) throws IOException {
-        return SQLExecutor.builder(clusterService)
+        return SQLExecutor.builder(clusterService, nodeCtx)
             .setSearchPath(searchPath)
             .addTable("create table " + tableIdent.fqn() + " (id int)");
     }

@@ -28,7 +28,6 @@ import io.crate.execution.dsl.phases.HashJoinPhase;
 import io.crate.execution.dsl.phases.NestedLoopPhase;
 import io.crate.execution.dsl.projection.builder.ProjectionBuilder;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.Reference;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.Schemas;
@@ -62,7 +61,6 @@ import static io.crate.analyze.TableDefinitions.USER_TABLE_IDENT;
 import static io.crate.planner.operators.LogicalPlannerTest.isPlan;
 import static io.crate.testing.SymbolMatchers.isInputColumn;
 import static io.crate.testing.SymbolMatchers.isReference;
-import static io.crate.testing.TestingHelpers.getFunctions;
 import static io.crate.testing.TestingHelpers.isSQL;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
@@ -75,15 +73,14 @@ public class JoinTest extends CrateDummyClusterServiceUnitTest {
     private static final RelationName TEST_DOC_LOCATIONS_TABLE_IDENT = new RelationName(Schemas.DOC_SCHEMA_NAME, "locations");
 
     private SQLExecutor e;
-    private Functions functions = getFunctions();
-    private ProjectionBuilder projectionBuilder = new ProjectionBuilder(functions);
+    private ProjectionBuilder projectionBuilder = new ProjectionBuilder(nodeCtx);
     private PlannerContext plannerCtx;
     private CoordinatorTxnCtx txnCtx = CoordinatorTxnCtx.systemTransactionContext();
     private LoadedRules loadedRules = new LoadedRules();
 
     @Before
     public void setUpExecutor() throws IOException {
-        e = SQLExecutor.builder(clusterService, 2, Randomness.get(), List.of())
+        e = SQLExecutor.builder(clusterService, nodeCtx, 2, Randomness.get(), List.of())
             .addTable(USER_TABLE_DEFINITION)
             .addTable(TEST_DOC_LOCATIONS_TABLE_DEFINITION)
             .addTable(T3.T1_DEFINITION)
@@ -101,7 +98,7 @@ public class JoinTest extends CrateDummyClusterServiceUnitTest {
 
     private LogicalPlan createLogicalPlan(QueriedSelectRelation mss, TableStats tableStats) {
         LogicalPlanner logicalPlanner = new LogicalPlanner(
-            functions,
+            nodeCtx,
             tableStats,
             () -> clusterService.state().nodes().getMinNodeVersion(),
             loadedRules
@@ -149,7 +146,7 @@ public class JoinTest extends CrateDummyClusterServiceUnitTest {
     @Test
     public void testNestedLoop_TablesAreSwitchedIfBlockJoinAndRightIsSmallerThanLeft() throws IOException {
         // blockNL is only possible on single node clusters
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table j.left_table (id int)")
             .addTable("create table j.right_table (id int)")
             .build();
@@ -192,7 +189,7 @@ public class JoinTest extends CrateDummyClusterServiceUnitTest {
 
         PlannerContext context = e.getPlannerContext(clusterService.state());
         LogicalPlanner logicalPlanner = new LogicalPlanner(
-            functions,
+            nodeCtx,
             tableStats,
             () -> clusterService.state().nodes().getMinNodeVersion(),
             loadedRules
@@ -223,7 +220,7 @@ public class JoinTest extends CrateDummyClusterServiceUnitTest {
         PlannerContext context = e.getPlannerContext(clusterService.state());
         context.transactionContext().sessionContext().setHashJoinEnabled(false);
         LogicalPlanner logicalPlanner = new LogicalPlanner(
-            functions,
+            nodeCtx,
             tableStats,
             () -> clusterService.state().nodes().getMinNodeVersion(),
             new LoadedRules()
@@ -315,7 +312,7 @@ public class JoinTest extends CrateDummyClusterServiceUnitTest {
     public void testBlockNestedLoopWhenTableSizeUnknownAndOneExecutionNode() throws IOException {
         // rebuild executor + cluster state with 1 node
         resetClusterService();
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable(T3.T1_DEFINITION)
             .addTable(T3.T4_DEFINITION)
             .build();
@@ -342,7 +339,7 @@ public class JoinTest extends CrateDummyClusterServiceUnitTest {
 
         // rebuild executor + cluster state with 1 node
         resetClusterService();
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable(T3.T1_DEFINITION)
             .addTable(T3.T4_DEFINITION)
             .setTableStats(tableStats)
@@ -375,7 +372,7 @@ public class JoinTest extends CrateDummyClusterServiceUnitTest {
 
         // rebuild executor + cluster state with 1 node
         resetClusterService();
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable(T3.T1_DEFINITION)
             .addTable(T3.T4_DEFINITION)
             .setTableStats(tableStats)
@@ -408,7 +405,7 @@ public class JoinTest extends CrateDummyClusterServiceUnitTest {
 
         // rebuild executor + cluster state with 1 node
         resetClusterService();
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable(T3.T1_DEFINITION)
             .addTable(T3.T4_DEFINITION)
             .setTableStats(tableStats)
@@ -417,7 +414,7 @@ public class JoinTest extends CrateDummyClusterServiceUnitTest {
 
         QueriedSelectRelation mss = e.analyze("select * from t1, t4 order by t1.x");
         LogicalPlanner logicalPlanner = new LogicalPlanner(
-            functions,
+            nodeCtx,
             tableStats,
             () -> clusterService.state().nodes().getMinNodeVersion(),
             loadedRules
@@ -437,7 +434,7 @@ public class JoinTest extends CrateDummyClusterServiceUnitTest {
                                               "JOIN t2 t2 on t1.a = t2.b " +
                                               "JOIN t3 t3 on t3.c = t2.b");
         LogicalPlanner logicalPlanner = new LogicalPlanner(
-            functions,
+            nodeCtx,
             new TableStats(),
             () -> clusterService.state().nodes().getMinNodeVersion(),
             loadedRules
@@ -451,7 +448,7 @@ public class JoinTest extends CrateDummyClusterServiceUnitTest {
     @Test
     public void testSameOutputIsNotDeDuplicated() throws Exception {
         resetClusterService(); // drop existing tables
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t1 (x int)")
             .addTable("create table t2 (x int)")
             .build();

@@ -26,7 +26,6 @@ import io.crate.analyze.expressions.ExpressionAnalyzer;
 import io.crate.analyze.relations.FieldProvider;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.Schemas;
 import io.crate.metadata.doc.DocTableInfo;
@@ -39,18 +38,17 @@ import java.util.HashMap;
 
 class RefreshTableAnalyzer {
 
-    private final Functions functions;
+    private final NodeContext nodeCtx;
     private final Schemas schemas;
 
-    RefreshTableAnalyzer(Functions functions, Schemas schemas) {
-        this.functions = functions;
+    RefreshTableAnalyzer(NodeContext nodeCtx, Schemas schemas) {
+        this.nodeCtx = nodeCtx;
         this.schemas = schemas;
     }
 
     public AnalyzedRefreshTable analyze(RefreshStatement<Expression> refreshStatement,
                                         ParamTypeHints paramTypeHints,
                                         CoordinatorTxnCtx txnCtx) {
-        var nodeCtx = new NodeContext(functions);
         var exprAnalyzerWithFieldsAsString = new ExpressionAnalyzer(
             txnCtx, nodeCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
         var exprCtx = new ExpressionAnalysisContext();

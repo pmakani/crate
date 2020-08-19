@@ -35,26 +35,15 @@ import io.crate.analyze.relations.ParentRelations;
 import io.crate.analyze.relations.RelationAnalyzer;
 import io.crate.analyze.relations.StatementAnalysisContext;
 import io.crate.auth.user.User;
-import io.crate.execution.engine.aggregation.impl.AggregationImplModule;
-import io.crate.execution.engine.window.WindowFunctionModule;
 import io.crate.expression.eval.EvaluatingNormalizer;
-import io.crate.expression.operator.OperatorModule;
-import io.crate.expression.predicate.PredicateModule;
-import io.crate.expression.scalar.ScalarFunctionModule;
 import io.crate.expression.symbol.Symbol;
-import io.crate.expression.tablefunctions.TableFunctionModule;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.RowGranularity;
 import io.crate.metadata.Schemas;
-import io.crate.metadata.settings.session.SessionSettingModule;
 import io.crate.metadata.table.Operation;
 import io.crate.sql.parser.SqlParser;
-import org.elasticsearch.common.inject.AbstractModule;
-import org.elasticsearch.common.inject.Injector;
-import org.elasticsearch.common.inject.ModulesBuilder;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -65,54 +54,40 @@ public class SqlExpressions {
 
     private final ExpressionAnalyzer expressionAnalyzer;
     private final ExpressionAnalysisContext expressionAnalysisCtx;
-    private final Injector injector;
     private final CoordinatorTxnCtx coordinatorTxnCtx;
     private final EvaluatingNormalizer normalizer;
-    private final Functions functions;
+    public final NodeContext nodeCtx;
 
-    public SqlExpressions(Map<RelationName, AnalyzedRelation> sources) {
-        this(sources, null, User.CRATE_USER);
+    public SqlExpressions(Map<RelationName, AnalyzedRelation> sources, NodeContext nodeCtx) {
+        this(sources, nodeCtx,null, User.CRATE_USER);
     }
 
     public SqlExpressions(Map<RelationName, AnalyzedRelation> sources,
+                          NodeContext nodeCtx,
                           @Nullable FieldResolver fieldResolver) {
-        this(sources, fieldResolver, User.CRATE_USER);
+        this(sources, nodeCtx, fieldResolver, User.CRATE_USER);
     }
 
     public SqlExpressions(Map<RelationName, AnalyzedRelation> sources,
+                          NodeContext nodeCtx,
                           @Nullable FieldResolver fieldResolver,
-                          User user,
-                          AbstractModule... additionalModules) {
-        ModulesBuilder modulesBuilder = new ModulesBuilder()
-            .add(new SessionSettingModule())
-            .add(new OperatorModule())
-            .add(new AggregationImplModule())
-            .add(new ScalarFunctionModule())
-            .add(new WindowFunctionModule())
-            .add(new TableFunctionModule())
-            .add(new PredicateModule());
-        if (additionalModules != null) {
-            for (AbstractModule module : additionalModules) {
-                modulesBuilder.add(module);
-            }
-        }
-        injector = modulesBuilder.createInjector();
-        functions = injector.getInstance(Functions.class);
+                          User user) {
+        this.nodeCtx = nodeCtx;
         coordinatorTxnCtx = new CoordinatorTxnCtx(new SessionContext(Option.NONE, user));
         expressionAnalyzer = new ExpressionAnalyzer(
             coordinatorTxnCtx,
-            new NodeContext(functions),
+            nodeCtx,
             ParamTypeHints.EMPTY,
             new FullQualifiedNameFieldProvider(
                 sources,
                 ParentRelations.NO_PARENTS,
                 coordinatorTxnCtx.sessionContext().searchPath().currentSchema()),
             new SubqueryAnalyzer(
-                new RelationAnalyzer(functions, mock(Schemas.class)),
+                new RelationAnalyzer(nodeCtx, mock(Schemas.class)),
                 new StatementAnalysisContext(ParamTypeHints.EMPTY, Operation.READ, coordinatorTxnCtx)
             )
         );
-        normalizer = new EvaluatingNormalizer(functions, RowGranularity.DOC, null, fieldResolver);
+        normalizer = new EvaluatingNormalizer(nodeCtx, RowGranularity.DOC, null, fieldResolver);
         expressionAnalysisCtx = new ExpressionAnalysisContext();
     }
 
@@ -126,14 +101,6 @@ public class SqlExpressions {
 
     public Symbol normalize(Symbol symbol) {
         return normalizer.normalize(symbol, coordinatorTxnCtx);
-    }
-
-    public <T> T getInstance(Class<T> clazz) {
-        return injector.getInstance(clazz);
-    }
-
-    public Functions functions() {
-        return functions;
     }
 
     public void setDefaultSchema(String schema) {

@@ -88,7 +88,7 @@ public class CreateAlterPartitionedTableAnalyzerTest extends CrateDummyClusterSe
                 .metadata(metadata)
                 .build();
         ClusterServiceUtils.setState(clusterService, state);
-        e = SQLExecutor.builder(clusterService).enableDefaultTables().build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).enableDefaultTables().build();
         plannerContext = e.getPlannerContext(clusterService.state());
     }
 
@@ -99,7 +99,7 @@ public class CreateAlterPartitionedTableAnalyzerTest extends CrateDummyClusterSe
             return (S) CreateTablePlan.bind(
                 (AnalyzedCreateTable) analyzedStatement,
                 plannerContext.transactionContext(),
-                plannerContext.functions(),
+                plannerContext.nodeContext(),
                 new RowN(arguments),
                 SubQueryResults.EMPTY,
                 new NumberOfShards(clusterService),
@@ -110,7 +110,7 @@ public class CreateAlterPartitionedTableAnalyzerTest extends CrateDummyClusterSe
             return (S) AlterTablePlan.bind(
                 (AnalyzedAlterTable) analyzedStatement,
                 plannerContext.transactionContext(),
-                plannerContext.functions(),
+                plannerContext.nodeContext(),
                 new RowN(arguments),
                 SubQueryResults.EMPTY
             );

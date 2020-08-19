@@ -38,6 +38,7 @@ import io.crate.expression.symbol.Symbol;
 import io.crate.lucene.LuceneQueryBuilder;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.CoordinatorTxnCtx;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.Schemas;
 import io.crate.metadata.doc.DocSchemaInfo;
 import io.crate.metadata.doc.DocTableInfo;
@@ -88,10 +89,11 @@ public final class QueryTester implements AutoCloseable {
         public Builder(Path tempDir,
                        ThreadPool threadPool,
                        ClusterService clusterService,
+                       NodeContext nodeCtx,
                        Version indexVersion,
                        String createTableStmt) throws IOException {
             sqlExecutor = SQLExecutor
-                .builder(clusterService)
+                .builder(clusterService, nodeCtx)
                 .addTable(createTableStmt)
                 .build();
             plannerContext = sqlExecutor.getPlannerContext(clusterService.state());
@@ -106,10 +108,11 @@ public final class QueryTester implements AutoCloseable {
                 indexVersion,
                 tempDir
             );
-            queryBuilder = new LuceneQueryBuilder(sqlExecutor.functions());
+            queryBuilder = new LuceneQueryBuilder(plannerContext.nodeContext());
             docTableRelation = new DocTableRelation(table);
             expressions = new SqlExpressions(
                 Collections.singletonMap(table.ident(), docTableRelation),
+                sqlExecutor.nodeCtx,
                 docTableRelation
             );
         }
@@ -134,7 +137,7 @@ public final class QueryTester implements AutoCloseable {
             DocumentMapper mapper = indexEnv.mapperService().documentMapperSafe();
             InsertSourceGen sourceGen = InsertSourceGen.of(
                 CoordinatorTxnCtx.systemTransactionContext(),
-                sqlExecutor.functions(),
+                plannerContext.nodeContext(),
                 table,
                 table.concreteIndices()[0],
                 GeneratedColumns.Validation.NONE,
@@ -152,7 +155,7 @@ public final class QueryTester implements AutoCloseable {
         }
 
         private LuceneBatchIterator getIterator(ColumnIdent column, Query query) {
-            InputFactory inputFactory = new InputFactory(sqlExecutor.functions());
+            InputFactory inputFactory = new InputFactory(plannerContext.nodeContext());
             InputFactory.Context<LuceneCollectorExpression<?>> ctx = inputFactory.ctxForRefs(
                 CoordinatorTxnCtx.systemTransactionContext(), indexEnv.luceneReferenceResolver());
             Input<?> input = ctx.add(requireNonNull(table.getReference(column),

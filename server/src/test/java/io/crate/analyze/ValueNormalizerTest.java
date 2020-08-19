@@ -68,7 +68,7 @@ public class ValueNormalizerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table doc.test1 (" +
                       " id long primary key," +
                       " name string," +
@@ -88,7 +88,7 @@ public class ValueNormalizerTest extends CrateDummyClusterServiceUnitTest {
                       "clustered by (id)")
             .build();
         userTableInfo = e.resolveTableInfo("doc.test1");
-        normalizer = EvaluatingNormalizer.functionOnlyNormalizer(e.functions());
+        normalizer = EvaluatingNormalizer.functionOnlyNormalizer(nodeCtx);
     }
 
     @Test

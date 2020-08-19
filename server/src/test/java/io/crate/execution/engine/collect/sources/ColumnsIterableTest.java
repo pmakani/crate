@@ -62,8 +62,8 @@ public class ColumnsIterableTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws Exception {
-        t1Info = SQLExecutor.tableInfo(T1, T1_DEFINITION, clusterService);
-        t4Info = SQLExecutor.tableInfo(T4, T4_DEFINITION, clusterService);
+        t1Info = SQLExecutor.tableInfo(T1, T1_DEFINITION, clusterService, nodeCtx);
+        t4Info = SQLExecutor.tableInfo(T4, T4_DEFINITION, clusterService, nodeCtx);
     }
 
     @Test

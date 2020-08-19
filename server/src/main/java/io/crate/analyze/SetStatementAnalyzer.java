@@ -26,17 +26,16 @@ import io.crate.analyze.expressions.ExpressionAnalyzer;
 import io.crate.analyze.relations.FieldProvider;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.sql.tree.Expression;
 import io.crate.sql.tree.SetStatement;
 
 class SetStatementAnalyzer {
 
-    private final Functions functions;
+    private final NodeContext nodeCtx;
 
-    SetStatementAnalyzer(Functions functions) {
-        this.functions = functions;
+    SetStatementAnalyzer(NodeContext nodeCtx) {
+        this.nodeCtx = nodeCtx;
     }
 
     public AnalyzedStatement analyze(SetStatement<Expression> node,
@@ -45,7 +44,7 @@ class SetStatementAnalyzer {
         boolean isPersistent = node.settingType().equals(SetStatement.SettingType.PERSISTENT);
         var exprAnalyzer = new ExpressionAnalyzer(
             txnCtx,
-            new NodeContext(functions),
+            nodeCtx,
             typeHints,
             FieldProvider.FIELDS_AS_LITERAL,
             null

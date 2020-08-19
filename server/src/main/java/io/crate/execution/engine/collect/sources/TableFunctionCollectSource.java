@@ -37,7 +37,7 @@ import io.crate.expression.InputCondition;
 import io.crate.expression.InputFactory;
 import io.crate.expression.symbol.Symbol;
 import io.crate.expression.symbol.format.Style;
-import io.crate.metadata.Functions;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.TransactionContext;
 import io.crate.metadata.tablefunctions.TableFunctionImplementation;
 import io.crate.types.RowType;
@@ -54,8 +54,8 @@ public class TableFunctionCollectSource implements CollectSource {
     private final InputFactory inputFactory;
 
     @Inject
-    public TableFunctionCollectSource(Functions functions) {
-        inputFactory = new InputFactory(functions);
+    public TableFunctionCollectSource(NodeContext nodeCtx) {
+        inputFactory = new InputFactory(nodeCtx);
     }
 
     @Override

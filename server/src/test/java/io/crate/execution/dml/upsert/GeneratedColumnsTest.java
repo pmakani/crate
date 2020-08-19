@@ -49,13 +49,13 @@ public class GeneratedColumnsTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testSubscriptExpressionThatReturnsAnArray() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (obj object as (arr array(integer)), arr as obj['arr'])")
             .build();
         QueriedSelectRelation query = e.analyze("select obj, arr from t");
         DocTableInfo table = ((DocTableRelation) query.from().get(0)).tableInfo();
         GeneratedColumns<Doc> generatedColumns = new GeneratedColumns<>(
-            new InputFactory(e.functions()),
+            new InputFactory(nodeCtx),
             CoordinatorTxnCtx.systemTransactionContext(),
             GeneratedColumns.Validation.NONE,
             new DocRefResolver(Collections.emptyList()),

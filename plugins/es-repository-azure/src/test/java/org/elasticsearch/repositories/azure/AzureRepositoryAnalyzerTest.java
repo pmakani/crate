@@ -49,7 +49,7 @@ public class AzureRepositoryAnalyzerTest extends CrateDummyClusterServiceUnitTes
                           .putCustom(RepositoriesMetadata.TYPE, repositoriesMetadata))
             .build();
         ClusterServiceUtils.setState(clusterService, clusterState);
-        e = SQLExecutor.builder(clusterService).build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).build();
         plannerContext = e.getPlannerContext(clusterService.state());
         repositoryParamValidator = new RepositoryParamValidator(
             Map.of("azure", new TypeSettings(AzureRepository.mandatorySettings(), AzureRepository.optionalSettings()))
@@ -63,7 +63,7 @@ public class AzureRepositoryAnalyzerTest extends CrateDummyClusterServiceUnitTes
             return (S) CreateRepositoryPlan.createRequest(
                 (AnalyzedCreateRepository) analyzedStatement,
                 plannerContext.transactionContext(),
-                plannerContext.functions(),
+                plannerContext.nodeContext(),
                 Row.EMPTY,
                 SubQueryResults.EMPTY,
                 repositoryParamValidator);

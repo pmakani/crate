@@ -29,7 +29,6 @@ import io.crate.auth.user.User;
 import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.Schemas;
 import io.crate.metadata.SearchPath;
@@ -43,11 +42,11 @@ import java.util.HashMap;
 public final class SwapTableAnalyzer {
 
     public static final String DROP_SOURCE = "drop_source";
-    private final Functions functions;
+    private final NodeContext nodeCtx;
     private final Schemas schemas;
 
-    SwapTableAnalyzer(Functions functions, Schemas schemas) {
-        this.functions = functions;
+    SwapTableAnalyzer(NodeContext nodeCtx, Schemas schemas) {
+        this.nodeCtx = nodeCtx;
         this.schemas = schemas;
     }
 
@@ -64,7 +63,6 @@ public final class SwapTableAnalyzer {
         if (dropSourceExpr == null) {
             dropSource = Literal.BOOLEAN_FALSE;
         } else {
-            NodeContext nodeCtx = new NodeContext(functions);
             ExpressionAnalyzer exprAnalyzer = new ExpressionAnalyzer(
                 txnCtx, nodeCtx, typeHints, FieldProvider.UNSUPPORTED, null);
             dropSource = exprAnalyzer.convert(dropSourceExpr, new ExpressionAnalysisContext());

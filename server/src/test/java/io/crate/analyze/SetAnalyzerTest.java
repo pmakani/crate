@@ -46,7 +46,7 @@ public class SetAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() {
-        executor = SQLExecutor.builder(clusterService).build();
+        executor = SQLExecutor.builder(clusterService, nodeCtx).build();
     }
 
     private <T> T analyze(String stmt) {

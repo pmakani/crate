@@ -83,7 +83,7 @@ public class SnapshotRestoreAnalyzerTest extends CrateDummyClusterServiceUnitTes
                 .putCustom(RepositoriesMetadata.TYPE, repositoriesMetadata))
             .build();
         ClusterServiceUtils.setState(clusterService, clusterState);
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable(USER_TABLE_DEFINITION)
             .addTable(TEST_DOC_LOCATIONS_TABLE_DEFINITION)
             .addPartitionedTable(TEST_PARTITIONED_TABLE_DEFINITION, TEST_PARTITIONED_TABLE_PARTITIONS)
@@ -99,7 +99,7 @@ public class SnapshotRestoreAnalyzerTest extends CrateDummyClusterServiceUnitTes
             return (T) CreateSnapshotPlan.createRequest(
                 (AnalyzedCreateSnapshot) analyzedStatement,
                 plannerContext.transactionContext(),
-                plannerContext.functions(),
+                plannerContext.nodeContext(),
                 Row.EMPTY,
                 SubQueryResults.EMPTY,
                 e.schemas());
@@ -107,7 +107,7 @@ public class SnapshotRestoreAnalyzerTest extends CrateDummyClusterServiceUnitTes
             return (T) RestoreSnapshotPlan.bind(
                 (AnalyzedRestoreSnapshot) analyzedStatement,
                 plannerContext.transactionContext(),
-                plannerContext.functions(),
+                plannerContext.nodeContext(),
                 Row.EMPTY,
                 SubQueryResults.EMPTY,
                 e.schemas());

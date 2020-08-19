@@ -30,7 +30,6 @@ import io.crate.exceptions.ColumnUnknownException;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.ReferenceIdent;
@@ -55,12 +54,12 @@ import static java.util.Collections.singletonList;
 class AlterTableAddColumnAnalyzer {
 
     private final Schemas schemas;
-    private final Functions functions;
+    private final NodeContext nodeCtx;
 
     AlterTableAddColumnAnalyzer(Schemas schemas,
-                                Functions functions) {
+                                NodeContext nodeCtx) {
         this.schemas = schemas;
-        this.functions = functions;
+        this.nodeCtx = nodeCtx;
     }
 
     public AnalyzedAlterTableAddColumn analyze(AlterTableAddColumn<Expression> alterTable,
@@ -75,7 +74,6 @@ class AlterTableAddColumnAnalyzer {
             txnCtx.sessionContext().user(),
             txnCtx.sessionContext().searchPath());
         TableReferenceResolver referenceResolver = new TableReferenceResolver(tableInfo.columns(), tableInfo.ident());
-        NodeContext nodeCtx = new NodeContext(functions);
 
         var exprAnalyzerWithReferenceResolver = new ExpressionAnalyzer(
             txnCtx, nodeCtx, paramTypeHints, referenceResolver, null);

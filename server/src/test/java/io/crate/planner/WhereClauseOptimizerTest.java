@@ -47,7 +47,7 @@ public class WhereClauseOptimizerTest extends CrateDummyClusterServiceUnitTest{
 
     @Before
     public void setUpExecutor() throws Exception {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table bystring (name string primary key, score double) " +
                       "clustered by (name) ")
             .addTable("create table clustered_by_only (x int) clustered by (x)")
@@ -73,7 +73,7 @@ public class WhereClauseOptimizerTest extends CrateDummyClusterServiceUnitTest{
         QueriedSelectRelation queriedTable = e.analyze(statement);
         DocTableRelation table = ((DocTableRelation) queriedTable.from().get(0));
         EvaluatingNormalizer normalizer = new EvaluatingNormalizer(
-            e.functions(),
+            nodeCtx,
             RowGranularity.CLUSTER,
             null,
             table
@@ -83,7 +83,7 @@ public class WhereClauseOptimizerTest extends CrateDummyClusterServiceUnitTest{
             queriedTable.where(),
             table.tableInfo(),
             e.getPlannerContext(clusterService.state()).transactionContext(),
-            e.functions()
+            nodeCtx
         );
     }
 

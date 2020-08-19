@@ -130,6 +130,7 @@ public class Session implements AutoCloseable {
     @Nullable
     CompletableFuture<?> activeExecution;
 
+    private final NodeContext nodeCtx;
     private final Analyzer analyzer;
     private final Planner planner;
     private final JobsLogs jobsLogs;
@@ -138,13 +139,15 @@ public class Session implements AutoCloseable {
 
     private TransactionState currentTransactionState = TransactionState.IDLE;
 
-    public Session(Analyzer analyzer,
+    public Session(NodeContext nodeCtx,
+                   Analyzer analyzer,
                    Planner planner,
                    JobsLogs jobsLogs,
                    boolean isReadOnly,
                    DependencyCarrier executor,
                    AccessControl accessControl,
                    SessionContext sessionContext) {
+        this.nodeCtx = nodeCtx;
         this.analyzer = analyzer;
         this.planner = planner;
         this.jobsLogs = jobsLogs;
@@ -171,7 +174,6 @@ public class Session implements AutoCloseable {
      */
     public void quickExec(String statement, Function<String, Statement> parse, ResultReceiver<?> resultReceiver, Row params) {
         CoordinatorTxnCtx txnCtx = new CoordinatorTxnCtx(sessionContext);
-        NodeContext nodeCtx = new NodeContext(planner.functions());
         Statement parsedStmt = parse.apply(statement);
         AnalyzedStatement analyzedStatement = analyzer.analyze(parsedStmt, sessionContext, ParamTypeHints.EMPTY);
         RoutingProvider routingProvider = new RoutingProvider(Randomness.get().nextInt(), planner.getAwarenessAttributes());
@@ -487,7 +489,6 @@ public class Session implements AutoCloseable {
         var routingProvider = new RoutingProvider(Randomness.get().nextInt(), planner.getAwarenessAttributes());
         var clusterState = executor.clusterService().state();
         var txnCtx = new CoordinatorTxnCtx(sessionContext);
-        var nodeCtx = new NodeContext(planner.functions());
         var plannerContext = new PlannerContext(
             clusterState,
             routingProvider,
@@ -569,7 +570,7 @@ public class Session implements AutoCloseable {
         var routingProvider = new RoutingProvider(Randomness.get().nextInt(), planner.getAwarenessAttributes());
         var clusterState = executor.clusterService().state();
         var txnCtx = new CoordinatorTxnCtx(sessionContext);
-        var nodeCtx = new NodeContext(executor.functions());
+        var nodeCtx = executor.nodeContext();
         var params = new RowN(portal.params().toArray());
         var plannerContext = new PlannerContext(
             clusterState, routingProvider, jobId, txnCtx, nodeCtx, maxRows, params);

@@ -35,7 +35,6 @@ import io.crate.data.RowConsumer;
 import io.crate.execution.support.OneRowActionListener;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.PartitionName;
 import io.crate.metadata.doc.DocTableInfo;
@@ -75,7 +74,7 @@ public class AlterTablePlan implements Plan {
         BoundAlterTable stmt = bind(
             alterTable,
             plannerContext.transactionContext(),
-            plannerContext.functions(),
+            dependencies.nodeContext(),
             params,
             subQueryResults);
 
@@ -86,12 +85,12 @@ public class AlterTablePlan implements Plan {
 
     public static BoundAlterTable bind(AnalyzedAlterTable analyzedAlterTable,
                                        CoordinatorTxnCtx txnCtx,
-                                       Functions functions,
+                                       NodeContext nodeCtx,
                                        Row params,
                                        SubQueryResults subQueryResults) {
         Function<? super Symbol, Object> eval = x -> SymbolEvaluator.evaluate(
             txnCtx,
-            new NodeContext(functions),
+            nodeCtx,
             x,
             params,
             subQueryResults

@@ -39,7 +39,7 @@ public class MetadataToASTNodeResolverTest extends CrateDummyClusterServiceUnitT
 
     @Test
     public void testBuildCreateTableColumns() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table doc.test (" +
                       " bools boolean," +
                       " bytes byte," +
@@ -122,7 +122,7 @@ public class MetadataToASTNodeResolverTest extends CrateDummyClusterServiceUnitT
 
     @Test
     public void testBuildCreateTablePrimaryKey() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table myschema.test (" +
                       " pk_col_one long," +
                       " pk_col_two long," +
@@ -172,7 +172,7 @@ public class MetadataToASTNodeResolverTest extends CrateDummyClusterServiceUnitT
 
     @Test
     public void testBuildCreateTableNotNull() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table myschema.test (" +
                       " col_a string," +
                       " col_b string not null index using fulltext," +
@@ -224,7 +224,7 @@ public class MetadataToASTNodeResolverTest extends CrateDummyClusterServiceUnitT
 
     @Test
     public void testBuildCreateTableCheckConstraints() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table doc.test (" +
                       " floats float constraint test_floats_check check (floats != -1)," +
                       " shorts short," +
@@ -272,7 +272,7 @@ public class MetadataToASTNodeResolverTest extends CrateDummyClusterServiceUnitT
 
     @Test
     public void testBuildCreateTableClusteredByPartitionedBy() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addPartitionedTable("create table myschema.test (" +
                       " id long," +
                       " partition_column string," +
@@ -324,7 +324,7 @@ public class MetadataToASTNodeResolverTest extends CrateDummyClusterServiceUnitT
 
     @Test
     public void testBuildCreateTableIndexes() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table myschema.test (" +
                       " id long," +
                       " col_a string," +
@@ -399,7 +399,7 @@ public class MetadataToASTNodeResolverTest extends CrateDummyClusterServiceUnitT
 
     @Test
     public void testBuildCreateTableStorageDefinitions() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table myschema.test (" +
                       " s string storage with (columnstore =false)" +
                       ") " +
@@ -447,7 +447,7 @@ public class MetadataToASTNodeResolverTest extends CrateDummyClusterServiceUnitT
 
     @Test
     public void testBuildCreateTableColumnDefaultClause() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("CREATE TABLE test (" +
                       "   col1 TEXT," +
                       "   col2 INTEGER DEFAULT 1 + 1," +
@@ -494,7 +494,7 @@ public class MetadataToASTNodeResolverTest extends CrateDummyClusterServiceUnitT
 
     @Test
     public void test_varchar_with_length_limit_is_printed_as_varchar_with_length_in_show_create_table() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table tbl (name varchar(10))")
             .build();
         DocTableInfo table = e.resolveTableInfo("tbl");

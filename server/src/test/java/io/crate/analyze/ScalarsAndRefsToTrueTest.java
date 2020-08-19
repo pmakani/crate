@@ -33,6 +33,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
+import static io.crate.testing.TestingHelpers.createNodeContext;
 import static io.crate.testing.SymbolMatchers.isLiteral;
 
 
@@ -48,7 +49,7 @@ public class ScalarsAndRefsToTrueTest extends ESTestCase {
             "number_of_replicas",
             "schema_name");
         Map<RelationName, AnalyzedRelation> sources = Map.of(dummyRelation.relationName(), dummyRelation);
-        expressions = new SqlExpressions(sources);
+        expressions = new SqlExpressions(sources, createNodeContext());
     }
 
     private Symbol convert(Symbol symbol) {

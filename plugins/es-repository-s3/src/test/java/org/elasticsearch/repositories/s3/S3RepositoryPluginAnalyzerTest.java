@@ -75,7 +75,7 @@ public class S3RepositoryPluginAnalyzerTest extends CrateDummyClusterServiceUnit
                           .putCustom(RepositoriesMetadata.TYPE, repositoriesMetadata))
             .build();
         ClusterServiceUtils.setState(clusterService, clusterState);
-        e = SQLExecutor.builder(clusterService).build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).build();
         plannerContext = e.getPlannerContext(clusterService.state());
         repositoryParamValidator = new RepositoryParamValidator(
             Map.of("s3", new TypeSettings(List.of(), S3Repository.optionalSettings()))
@@ -89,7 +89,7 @@ public class S3RepositoryPluginAnalyzerTest extends CrateDummyClusterServiceUnit
             return (S) CreateRepositoryPlan.createRequest(
                 (AnalyzedCreateRepository) analyzedStatement,
                 plannerContext.transactionContext(),
-                plannerContext.functions(),
+                plannerContext.nodeContext(),
                 Row.EMPTY,
                 SubQueryResults.EMPTY,
                 repositoryParamValidator);

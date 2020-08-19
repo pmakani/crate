@@ -68,7 +68,6 @@ import io.crate.statistics.Stats;
 import io.crate.statistics.TableStats;
 import io.crate.test.integration.CrateDummyClusterServiceUnitTest;
 import io.crate.testing.SQLExecutor;
-import io.crate.testing.SymbolMatchers;
 import io.crate.testing.T3;
 import io.crate.types.DataTypes;
 import org.hamcrest.Matchers;
@@ -108,7 +107,7 @@ public class SelectPlannerTest extends CrateDummyClusterServiceUnitTest {
         TableStats tableStats = new TableStats();
         tableStats.updateTableStats(
             Map.of(new RelationName("doc", "users"), new Stats(20, 20, Map.of())));
-        e = SQLExecutor.builder(clusterService, 2, RandomizedTest.getRandom(), List.of())
+        e = SQLExecutor.builder(clusterService, nodeCtx, 2, RandomizedTest.getRandom(), List.of())
             .addTable(TableDefinitions.USER_TABLE_DEFINITION)
             .addTable(TableDefinitions.TEST_CLUSTER_BY_STRING_TABLE_DEFINITION)
             .addTable(TableDefinitions.USER_TABLE_CLUSTERED_BY_ONLY_DEFINITION)
@@ -506,7 +505,7 @@ public class SelectPlannerTest extends CrateDummyClusterServiceUnitTest {
     public void testReferenceToNestedAggregatedField() throws Exception {
         // rebuild executor + cluster state with 1 node
         resetClusterService();
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable(T3.T1_DEFINITION)
             .build();
 

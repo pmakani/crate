@@ -83,11 +83,11 @@ public class ReturnValueGenTest extends CrateDummyClusterServiceUnitTest {
     }
 
     private void setupStatement(String stmt) throws IOException {
-        SQLExecutor executor = SQLExecutor.builder(clusterService).addTable(CREATE_TEST_TABLE).build();
+        SQLExecutor executor = SQLExecutor.builder(clusterService, nodeCtx).addTable(CREATE_TEST_TABLE).build();
         AnalyzedUpdateStatement update = executor.analyze(stmt);
         tableInfo = (DocTableInfo) update.table().tableInfo();
-        returnValueGen = new ReturnValueGen(executor.functions(),
-                                            txnCtx,
+        returnValueGen = new ReturnValueGen(txnCtx,
+                                            nodeCtx,
                                             tableInfo,
                                             update.outputs() == null ? null : update.outputs().toArray(new Symbol[0]));
     }

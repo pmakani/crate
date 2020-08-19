@@ -31,7 +31,7 @@ public class GroupByScalarPlannerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService, 2, RandomizedTest.getRandom(), List.of())
+        e = SQLExecutor.builder(clusterService, nodeCtx, 2, RandomizedTest.getRandom(), List.of())
             .enableDefaultTables()
             .build();
     }

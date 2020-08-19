@@ -38,7 +38,7 @@ public class DocTableRelationTest extends CrateDummyClusterServiceUnitTest {
         DocTableInfo tableInfo = SQLExecutor.tableInfo(
             new RelationName("doc", "t1"),
             "create table doc.t1 (i int primary key)",
-            clusterService);
+            clusterService, nodeCtx);
         DocTableRelation rel = new DocTableRelation(tableInfo);
 
         expectedException.expect(ColumnValidationException.class);
@@ -51,7 +51,7 @@ public class DocTableRelationTest extends CrateDummyClusterServiceUnitTest {
         DocTableInfo tableInfo = SQLExecutor.tableInfo(
             new RelationName("doc", "t1"),
             "create table doc.t1 (i int, j int, primary key (i, j))",
-            clusterService);
+            clusterService, nodeCtx);
         DocTableRelation rel = new DocTableRelation(tableInfo);
 
         expectedException.expect(ColumnValidationException.class);
@@ -64,7 +64,7 @@ public class DocTableRelationTest extends CrateDummyClusterServiceUnitTest {
         DocTableInfo tableInfo = SQLExecutor.tableInfo(
             new RelationName("doc", "t1"),
             "create table doc.t1 (i int) clustered by (i)",
-            clusterService);
+            clusterService, nodeCtx);
         DocTableRelation rel = new DocTableRelation(tableInfo);
 
         expectedException.expect(ColumnValidationException.class);

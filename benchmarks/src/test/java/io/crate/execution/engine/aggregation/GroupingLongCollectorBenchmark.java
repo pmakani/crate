@@ -77,7 +77,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static io.crate.data.SentinelRow.SENTINEL;
-import static io.crate.testing.TestingHelpers.getFunctions;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -97,7 +96,7 @@ public class GroupingLongCollectorBenchmark {
         IndexWriter iw = new IndexWriter(new ByteBuffersDirectory(), new IndexWriterConfig(new StandardAnalyzer()));
         Functions functions = new ModulesBuilder().add(new AggregationImplModule())
             .createInjector().getInstance(Functions.class);
-        SumAggregation<?> sumAgg = (SumAggregation<?>) getFunctions().getQualified(
+        SumAggregation<?> sumAgg = (SumAggregation<?>) functions.getQualified(
             Signature.aggregate(
                 SumAggregation.NAME,
                 DataTypes.INTEGER.getTypeSignature(),

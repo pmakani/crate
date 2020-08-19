@@ -44,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntIndexedContainer;
 
+import static io.crate.testing.TestingHelpers.createNodeContext;
 import static org.hamcrest.Matchers.is;
 
 @ESIntegTestCase.ClusterScope(numDataNodes = 1)
@@ -75,7 +76,7 @@ public class InternalCountOperationTest extends SQLTransportIntegrationTest {
         TableInfo tableInfo = schemas.getTableInfo(new RelationName(sqlExecutor.getCurrentSchema(), "t"));
         TableRelation tableRelation = new TableRelation(tableInfo);
         Map<RelationName, AnalyzedRelation> tableSources = Map.of(tableInfo.ident(), tableRelation);
-        SqlExpressions sqlExpressions = new SqlExpressions(tableSources, tableRelation);
+        SqlExpressions sqlExpressions = new SqlExpressions(tableSources, createNodeContext(), tableRelation);
 
         Symbol filter = sqlExpressions.normalize(sqlExpressions.asSymbol("name = 'Marvin'"));
         {

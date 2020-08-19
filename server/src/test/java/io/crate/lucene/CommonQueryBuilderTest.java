@@ -25,7 +25,6 @@ import io.crate.analyze.WhereClause;
 import io.crate.analyze.relations.AnalyzedRelation;
 import io.crate.analyze.relations.TableRelation;
 import io.crate.auth.user.User;
-import io.crate.exceptions.ConversionException;
 import io.crate.lucene.match.CrateRegexQuery;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.doc.DocSchemaInfo;
@@ -55,6 +54,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 
+
 public class CommonQueryBuilderTest extends LuceneQueryBuilderTest {
 
     @Test
@@ -77,11 +77,12 @@ public class CommonQueryBuilderTest extends LuceneQueryBuilderTest {
                 "create table doc.test_primitive (" +
                 "  x " + type.getName() +
                 ")",
-                clusterService);
+                clusterService,
+                nodeCtx);
 
             TableRelation tableRelation = new TableRelation(tableInfo);
             Map<RelationName, AnalyzedRelation> tableSources = Map.of(tableInfo.ident(), tableRelation);
-            SqlExpressions sqlExpressions = new SqlExpressions(tableSources, tableRelation, User.CRATE_USER);
+            SqlExpressions sqlExpressions = new SqlExpressions(tableSources, nodeCtx, tableRelation, User.CRATE_USER);
 
             Query query = convert(sqlExpressions.normalize(sqlExpressions.asSymbol("x = null")));
 

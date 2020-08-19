@@ -3,7 +3,6 @@ package io.crate.planner;
 import io.crate.action.sql.SessionContext;
 import io.crate.expression.symbol.Literal;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.NodeContext;
 import io.crate.metadata.RoutingProvider;
 import io.crate.planner.node.ddl.UpdateSettingsPlan;
 import io.crate.sql.tree.Assignment;
@@ -27,7 +26,7 @@ public class PlannerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() {
-        e = SQLExecutor.builder(clusterService).build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).build();
     }
 
     @Test
@@ -56,7 +55,7 @@ public class PlannerTest extends CrateDummyClusterServiceUnitTest {
             new RoutingProvider(Randomness.get().nextInt(), Collections.emptyList()),
             UUID.randomUUID(),
             new CoordinatorTxnCtx(SessionContext.systemSessionContext()),
-            new NodeContext(e.functions()),
+            nodeCtx,
             0,
             null
         );

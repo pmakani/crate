@@ -27,7 +27,6 @@ import io.crate.analyze.expressions.TableReferenceResolver;
 import io.crate.analyze.relations.FieldProvider;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.RelationName;
 import io.crate.planner.operators.EnsureNoMatchPredicate;
@@ -47,10 +46,10 @@ import java.util.function.Function;
 
 public final class CreateTableStatementAnalyzer {
 
-    private final Functions functions;
+    private final NodeContext nodeCtx;
 
-    public CreateTableStatementAnalyzer(Functions functions) {
-        this.functions = functions;
+    public CreateTableStatementAnalyzer(NodeContext nodeCtx) {
+        this.nodeCtx = nodeCtx;
     }
 
     public AnalyzedCreateTable analyze(CreateTable<Expression> createTable,
@@ -59,7 +58,6 @@ public final class CreateTableStatementAnalyzer {
         RelationName relationName = RelationName
             .of(createTable.name().getName(), txnCtx.sessionContext().searchPath().currentSchema());
         relationName.ensureValidForRelationCreation();
-        var nodeCtx = new NodeContext(functions);
 
         var exprAnalyzerWithoutFields = new ExpressionAnalyzer(
             txnCtx, nodeCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);

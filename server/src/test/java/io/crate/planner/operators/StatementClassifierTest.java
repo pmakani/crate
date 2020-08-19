@@ -40,7 +40,7 @@ public class StatementClassifierTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable(USER_TABLE_DEFINITION)
             .build();
     }

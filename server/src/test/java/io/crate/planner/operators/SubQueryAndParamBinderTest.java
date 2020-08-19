@@ -30,12 +30,14 @@ import org.junit.Test;
 
 import java.util.Map;
 
+import static io.crate.testing.TestingHelpers.createNodeContext;
+
 public class SubQueryAndParamBinderTest extends ESTestCase {
 
     @Test
     public void test_user_friendly_error_if_not_enough_param_values_provided() {
         SubQueryAndParamBinder paramBinder = new SubQueryAndParamBinder(Row.EMPTY, SubQueryResults.EMPTY);
-        Symbol symbol = new SqlExpressions(Map.of()).asSymbol("$1 > 10");
+        Symbol symbol = new SqlExpressions(Map.of(), createNodeContext()).asSymbol("$1 > 10");
 
         expectedException.expectMessage("The query contains a parameter placeholder $1, but there are only 0 parameter values");
         paramBinder.apply(symbol);

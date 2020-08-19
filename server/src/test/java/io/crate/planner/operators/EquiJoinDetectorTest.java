@@ -38,7 +38,7 @@ public class EquiJoinDetectorTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws Exception {
-        sqlExpressions = new SqlExpressions(T3.sources(clusterService));
+        sqlExpressions = new SqlExpressions(T3.sources(clusterService), nodeCtx);
     }
 
     @Test

@@ -55,7 +55,7 @@ public class FetchRewriteTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void test_fetch_rewrite_on_eval_removes_eval_and_extends_replaced_outputs() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table tbl (x int)")
             .build();
 
@@ -94,7 +94,7 @@ public class FetchRewriteTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void test_fetchrewrite_on_rename_puts_fetch_marker_into_alias_scope() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table tbl (x int)")
             .build();
         DocTableInfo tableInfo = e.resolveTableInfo("tbl");

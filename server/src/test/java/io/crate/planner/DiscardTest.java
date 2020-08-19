@@ -35,7 +35,7 @@ public class DiscardTest extends CrateDummyClusterServiceUnitTest {
         // discard is for discarding the session state and needs special handling in `Session`
         // The planner always returns a noopPlan
 
-        SQLExecutor e = SQLExecutor.builder(clusterService).build();
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx).build();
         assertThat(e.plan("DISCARD ALL"), Matchers.sameInstance(NoopPlan.INSTANCE));
         assertThat(e.plan("DISCARD PLANS"), Matchers.sameInstance(NoopPlan.INSTANCE));
         assertThat(e.plan("DISCARD SEQUENCES"), Matchers.sameInstance(NoopPlan.INSTANCE));

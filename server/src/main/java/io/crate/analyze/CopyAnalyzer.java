@@ -31,7 +31,6 @@ import io.crate.common.collections.Lists2;
 import io.crate.expression.eval.EvaluatingNormalizer;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.RowGranularity;
 import io.crate.metadata.Schemas;
@@ -47,11 +46,11 @@ import io.crate.sql.tree.Table;
 class CopyAnalyzer {
 
     private final Schemas schemas;
-    private final Functions functions;
+    private final NodeContext nodeCtx;
 
-    CopyAnalyzer(Schemas schemas, Functions functions) {
+    CopyAnalyzer(Schemas schemas, NodeContext nodeCtx) {
         this.schemas = schemas;
-        this.functions = functions;
+        this.nodeCtx = nodeCtx;
     }
 
     AnalyzedCopyFrom analyzeCopyFrom(CopyFrom<Expression> node,
@@ -64,7 +63,6 @@ class CopyAnalyzer {
             txnCtx.sessionContext().searchPath());
 
         var exprCtx = new ExpressionAnalysisContext();
-        var nodeCtx = new NodeContext(functions);
 
         var exprAnalyzerWithoutFields = new ExpressionAnalyzer(
             txnCtx, nodeCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
@@ -72,7 +70,7 @@ class CopyAnalyzer {
             txnCtx, nodeCtx, paramTypeHints, FieldProvider.FIELDS_AS_LITERAL, null);
 
         var normalizer = new EvaluatingNormalizer(
-            functions,
+            nodeCtx,
             RowGranularity.CLUSTER,
             null,
             new TableRelation(tableInfo));
@@ -113,11 +111,10 @@ class CopyAnalyzer {
         DocTableRelation tableRelation = new DocTableRelation((DocTableInfo) tableInfo);
 
         EvaluatingNormalizer normalizer = new EvaluatingNormalizer(
-            functions,
+            nodeCtx,
             RowGranularity.CLUSTER,
             null,
             tableRelation);
-        NodeContext nodeCtx = new NodeContext(functions);
 
         var exprCtx = new ExpressionAnalysisContext();
         var expressionAnalyzer = new ExpressionAnalyzer(

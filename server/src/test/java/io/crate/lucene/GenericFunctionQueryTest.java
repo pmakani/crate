@@ -40,6 +40,7 @@ public class GenericFunctionQueryTest extends CrateDummyClusterServiceUnitTest {
             createTempDir(),
             THREAD_POOL,
             clusterService,
+            nodeCtx,
             Version.CURRENT,
             "create table t (x int)"
         );
@@ -58,6 +59,7 @@ public class GenericFunctionQueryTest extends CrateDummyClusterServiceUnitTest {
             createTempDir(),
             THREAD_POOL,
             clusterService,
+            nodeCtx,
             Version.CURRENT,
             "create table t (x int)"
         );

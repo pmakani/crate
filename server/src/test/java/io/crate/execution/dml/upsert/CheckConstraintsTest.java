@@ -49,7 +49,7 @@ public class CheckConstraintsTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void setUpExecutor() throws Exception {
-        SQLExecutor sqlExecutor = SQLExecutor.builder(clusterService)
+        SQLExecutor sqlExecutor = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("CREATE TABLE t (" +
                       "    id int," +
                       "    qty int," +
@@ -60,7 +60,7 @@ public class CheckConstraintsTest extends CrateDummyClusterServiceUnitTest {
         TransactionContext txnCtx = CoordinatorTxnCtx.systemTransactionContext();
         checkConstraints = new CheckConstraints(
             txnCtx,
-            new InputFactory(sqlExecutor.functions()),
+            new InputFactory(nodeCtx),
             FromSourceRefResolver.WITHOUT_PARTITIONED_BY_REFS,
             docTableInfo);
     }
@@ -95,7 +95,7 @@ public class CheckConstraintsTest extends CrateDummyClusterServiceUnitTest {
     public void test_cannot_have_two_check_constraints_of_same_name() throws Exception {
         expectedException.expectMessage(
             "a check constraint of the same name is already declared [id_is_even]");
-        SQLExecutor.builder(clusterService)
+        SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("CREATE TABLE t (" +
                       "    id int CONSTRAINT id_is_even CHECK(id % 2 = 0)," +
                       "    qty int," +

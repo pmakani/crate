@@ -57,7 +57,7 @@ public class GroupByAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        sqlExecutor = SQLExecutor.builder(clusterService)
+        sqlExecutor = SQLExecutor.builder(clusterService, nodeCtx)
             .enableDefaultTables()
             .addTable("create table foo.users (" +
                       " id long primary key," +

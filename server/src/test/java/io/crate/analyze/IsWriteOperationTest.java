@@ -35,7 +35,7 @@ public class IsWriteOperationTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void setUpExecutor() throws Exception {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t1 (x int)")
             .addBlobTable("create blob table blobs")
             .build();

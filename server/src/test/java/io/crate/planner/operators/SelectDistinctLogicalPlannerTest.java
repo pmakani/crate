@@ -35,7 +35,7 @@ public class SelectDistinctLogicalPlannerTest extends CrateDummyClusterServiceUn
 
     @Before
     public void createExecutor() throws Exception {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table users (id int, department_id int, name string)")
             .addTable("create table departments (id int, name string)")
             .build();

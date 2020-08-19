@@ -24,6 +24,7 @@ package io.crate.execution.dml.upsert;
 
 import io.crate.common.collections.Maps;
 import io.crate.metadata.CoordinatorTxnCtx;
+import io.crate.metadata.NodeContext;
 import io.crate.metadata.TransactionContext;
 import io.crate.metadata.doc.DocTableInfo;
 import io.crate.test.integration.CrateDummyClusterServiceUnitTest;
@@ -40,12 +41,12 @@ public class GeneratedColsFromRawInsertSourceTest extends CrateDummyClusterServi
 
     @Test
     public void test_generated_based_on_default() throws Exception {
-        var e = SQLExecutor.builder(clusterService)
+        var e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table generated_based_on_default (x int default 1, y as x + 1)")
             .build();
         DocTableInfo t = e.resolveTableInfo("generated_based_on_default");
         GeneratedColsFromRawInsertSource insertSource = new GeneratedColsFromRawInsertSource(
-            txnCtx, e.functions(), t.generatedColumns(), t.defaultExpressionColumns());
+            txnCtx, nodeCtx, t.generatedColumns(), t.defaultExpressionColumns());
         Map<String, Object> map = insertSource.generateSourceAndCheckConstraints(new Object[]{"{}"});
         assertThat(Maps.getByPath(map, "x"), is(1));
         assertThat(Maps.getByPath(map, "y"), is(2));
@@ -53,12 +54,12 @@ public class GeneratedColsFromRawInsertSourceTest extends CrateDummyClusterServi
 
     @Test
     public void test_value_is_not_overwritten_by_default() throws Exception {
-        var e = SQLExecutor.builder(clusterService)
+        var e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table generated_based_on_default (x int default 1, y as x + 1)")
             .build();
         DocTableInfo t = e.resolveTableInfo("generated_based_on_default");
         GeneratedColsFromRawInsertSource insertSource = new GeneratedColsFromRawInsertSource(
-            txnCtx, e.functions(), t.generatedColumns(), t.defaultExpressionColumns());
+            txnCtx, nodeCtx, t.generatedColumns(), t.defaultExpressionColumns());
         Map<String, Object> map = insertSource.generateSourceAndCheckConstraints(new Object[]{"{\"x\":2}"});
         assertThat(Maps.getByPath(map, "x"), is(2));
         assertThat(Maps.getByPath(map, "y"), is(3));
@@ -66,24 +67,24 @@ public class GeneratedColsFromRawInsertSourceTest extends CrateDummyClusterServi
 
     @Test
     public void test_generate_value_text_type_with_length_exceeding_whitespaces_trimmed() throws Exception {
-        var e = SQLExecutor.builder(clusterService)
+        var e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (x varchar(2) as 'ab  ')")
             .build();
         DocTableInfo t = e.resolveTableInfo("t");
         var insertSource = new GeneratedColsFromRawInsertSource(
-            txnCtx, e.functions(), t.generatedColumns(), t.defaultExpressionColumns());
+            txnCtx, nodeCtx, t.generatedColumns(), t.defaultExpressionColumns());
         Map<String, Object> map = insertSource.generateSourceAndCheckConstraints(new Object[]{"{}"});
         assertThat(Maps.getByPath(map, "x"), is("ab"));
     }
 
     @Test
     public void test_generate_value_that_exceeds_text_type_with_length_throws_exception() throws Exception {
-        var e = SQLExecutor.builder(clusterService)
+        var e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (x varchar(2) as 'abc')")
             .build();
         DocTableInfo t = e.resolveTableInfo("t");
         var insertSource = new GeneratedColsFromRawInsertSource(
-            txnCtx, e.functions(), t.generatedColumns(), t.defaultExpressionColumns());
+            txnCtx, nodeCtx, t.generatedColumns(), t.defaultExpressionColumns());
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("'abc' is too long for the text type of length: 2");
         insertSource.generateSourceAndCheckConstraints(new Object[]{"{}"});
@@ -91,12 +92,12 @@ public class GeneratedColsFromRawInsertSourceTest extends CrateDummyClusterServi
 
     @Test
     public void test_default_value_that_exceeds_text_type_with_length_throws_exception() throws Exception {
-        var e = SQLExecutor.builder(clusterService)
+        var e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (x varchar(2) as 'abc')")
             .build();
         DocTableInfo t = e.resolveTableInfo("t");
         var insertSource = new GeneratedColsFromRawInsertSource(
-            txnCtx, e.functions(), t.generatedColumns(), t.defaultExpressionColumns());
+            txnCtx, nodeCtx, t.generatedColumns(), t.defaultExpressionColumns());
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("'abc' is too long for the text type of length: 2");
         insertSource.generateSourceAndCheckConstraints(new Object[]{"{}"});

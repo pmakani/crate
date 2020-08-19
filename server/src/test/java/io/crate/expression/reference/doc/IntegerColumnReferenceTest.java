@@ -38,6 +38,7 @@ public class IntegerColumnReferenceTest extends CrateDummyClusterServiceUnitTest
             createTempDir(),
             THREAD_POOL,
             clusterService,
+            nodeCtx,
             Version.CURRENT,
             "create table t (x int)"
         );

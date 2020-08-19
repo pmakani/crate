@@ -49,14 +49,14 @@ public class GeneratedReferenceTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws Exception {
-        executor = SQLExecutor.builder(clusterService)
+        executor = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable(T1_DEFINITION)
             .build();
         t1Info = executor.schemas().getTableInfo(T1);
 
         DocTableRelation tableRelation = new DocTableRelation(t1Info);
         tableRelation.getField(new ColumnIdent("a"));   // allocate field so it can be resolved
-        expressions = new SqlExpressions(Collections.emptyMap(), tableRelation);
+        expressions = new SqlExpressions(Collections.emptyMap(), executor.nodeCtx, tableRelation);
     }
 
     @Test

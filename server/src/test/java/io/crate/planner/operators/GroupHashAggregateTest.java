@@ -65,7 +65,7 @@ public class GroupHashAggregateTest extends CrateDummyClusterServiceUnitTest {
         );
         tableStats = new TableStats();
         tableStats.updateTableStats(Map.of(new RelationName("doc", "t1"), stats));
-        expressions = new SqlExpressions(T3.sources(clusterService));
+        expressions = new SqlExpressions(T3.sources(clusterService), nodeCtx);
     }
 
     @Test

@@ -71,7 +71,7 @@ public class CreateDropRepositoryAnalyzerTest extends CrateDummyClusterServiceUn
                           .putCustom(RepositoriesMetadata.TYPE, repositoriesMetadata))
             .build();
         ClusterServiceUtils.setState(clusterService, clusterState);
-        e = SQLExecutor.builder(clusterService).build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).build();
         plannerContext = e.getPlannerContext(clusterService.state());
         repositoryParamValidator = new RepositoryParamValidator(Map.of(
             "fs", new TypeSettings(FsRepository.mandatorySettings(), FsRepository.optionalSettings())
@@ -85,7 +85,7 @@ public class CreateDropRepositoryAnalyzerTest extends CrateDummyClusterServiceUn
             return (S) CreateRepositoryPlan.createRequest(
                 (AnalyzedCreateRepository) analyzedStatement,
                 plannerContext.transactionContext(),
-                plannerContext.functions(),
+                plannerContext.nodeContext(),
                 Row.EMPTY,
                 SubQueryResults.EMPTY,
                 repositoryParamValidator);

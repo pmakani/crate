@@ -63,7 +63,7 @@ public class BlobTableAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService).addBlobTable("create blob table blobs").build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).addBlobTable("create blob table blobs").build();
         plannerContext = e.getPlannerContext(clusterService.state());
     }
 
@@ -71,7 +71,7 @@ public class BlobTableAnalyzerTest extends CrateDummyClusterServiceUnitTest {
         return CreateBlobTablePlan.buildSettings(
             blobTable.createBlobTable(),
             plannerContext.transactionContext(),
-            plannerContext.functions(),
+            plannerContext.nodeContext(),
             new RowN(arguments),
             SubQueryResults.EMPTY,
             new NumberOfShards(clusterService));

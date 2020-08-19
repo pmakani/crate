@@ -32,6 +32,8 @@ import org.elasticsearch.cluster.service.ClusterService;
 import java.io.IOException;
 import java.util.Map;
 
+import static io.crate.testing.TestingHelpers.createNodeContext;
+
 public class T3 {
 
     public static final String T1_DEFINITION =
@@ -91,7 +93,7 @@ public class T3 {
     }
 
     public static Map<RelationName, AnalyzedRelation> sources(Iterable<RelationName> relations, ClusterService clusterService) {
-        SQLExecutor.Builder executorBuilder = SQLExecutor.builder(clusterService);
+        SQLExecutor.Builder executorBuilder = SQLExecutor.builder(clusterService, createNodeContext());
         relations.forEach(rn -> {
             String tableDefinition = RELATION_DEFINITIONS.get(rn);
             if (tableDefinition == null) {

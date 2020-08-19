@@ -46,7 +46,6 @@ import io.crate.memory.OnHeapMemoryManager;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.CoordinatorTxnCtx;
 import io.crate.metadata.FunctionImplementation;
-import io.crate.metadata.Functions;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.TransactionContext;
 import io.crate.metadata.doc.DocTableInfo;
@@ -69,6 +68,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static io.crate.testing.TestingHelpers.createNodeContext;
 import static io.crate.data.SentinelRow.SENTINEL;
 import static io.crate.execution.engine.sort.Comparators.createComparator;
 import static org.hamcrest.Matchers.instanceOf;
@@ -80,7 +80,6 @@ public abstract class AbstractWindowFunctionTest extends CrateDummyClusterServic
 
     private AbstractModule[] additionalModules;
     private SqlExpressions sqlExpressions;
-    private Functions functions;
     private TransactionContext txnCtx = CoordinatorTxnCtx.systemTransactionContext();
     private InputFactory inputFactory;
     private OnHeapMemoryManager memoryManager;
@@ -91,21 +90,22 @@ public abstract class AbstractWindowFunctionTest extends CrateDummyClusterServic
 
     @Before
     public void prepareFunctions() {
+        nodeCtx = createNodeContext(additionalModules);
         DocTableInfo tableInfo = SQLExecutor.tableInfo(
             new RelationName("doc", "t1"),
             "create table doc.t1 (x int, y bigint, z string, d double)",
-            clusterService);
+            clusterService,
+            nodeCtx);
         DocTableRelation tableRelation = new DocTableRelation(tableInfo);
         Map<RelationName, AnalyzedRelation> tableSources = Map.of(tableInfo.ident(), tableRelation);
         memoryManager = new OnHeapMemoryManager(bytes -> {});
         sqlExpressions = new SqlExpressions(
             tableSources,
+            nodeCtx,
             tableRelation,
-            User.CRATE_USER,
-            additionalModules
+            User.CRATE_USER
         );
-        functions = sqlExpressions.functions();
-        inputFactory = new InputFactory(functions);
+        inputFactory = new InputFactory(sqlExpressions.nodeCtx);
     }
 
     private static void performInputSanityChecks(Object[]... inputs) {
@@ -138,7 +138,7 @@ public abstract class AbstractWindowFunctionTest extends CrateDummyClusterServic
         var argsCtx = inputFactory.ctxForRefs(txnCtx, referenceResolver);
         argsCtx.add(windowFunctionSymbol.arguments());
 
-        FunctionImplementation impl = functions.getQualified(
+        FunctionImplementation impl = sqlExpressions.nodeCtx.functions().getQualified(
             windowFunctionSymbol,
             txnCtx.sessionSettings().searchPath()
         );
@@ -171,8 +171,8 @@ public abstract class AbstractWindowFunctionTest extends CrateDummyClusterServic
             InMemoryBatchIterator.of(Arrays.stream(inputRows).map(RowN::new).collect(Collectors.toList()), SENTINEL,
                                      true),
             new IgnoreRowAccounting(),
-            WindowProjector.createComputeStartFrameBoundary(numCellsInSourceRows, functions, txnCtx, mappedWindowDef, cmpOrderBy),
-            WindowProjector.createComputeEndFrameBoundary(numCellsInSourceRows, functions, txnCtx, mappedWindowDef, cmpOrderBy),
+            WindowProjector.createComputeStartFrameBoundary(numCellsInSourceRows, txnCtx, sqlExpressions.nodeCtx, mappedWindowDef, cmpOrderBy),
+            WindowProjector.createComputeEndFrameBoundary(numCellsInSourceRows, txnCtx, sqlExpressions.nodeCtx, mappedWindowDef, cmpOrderBy),
             createComparator(() -> inputFactory.ctxForRefs(txnCtx, referenceResolver), partitionOrderBy),
             cmpOrderBy,
             numCellsInSourceRows,

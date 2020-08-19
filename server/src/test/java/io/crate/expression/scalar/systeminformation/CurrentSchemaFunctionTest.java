@@ -23,7 +23,6 @@
 package io.crate.expression.scalar.systeminformation;
 
 import io.crate.expression.scalar.AbstractScalarFunctionsTest;
-import io.crate.metadata.Functions;
 import io.crate.testing.SqlExpressions;
 import org.junit.Test;
 
@@ -34,16 +33,14 @@ public class CurrentSchemaFunctionTest extends AbstractScalarFunctionsTest {
 
     @Test
     public void testNormalizeCurrentSchemaDefaultSchema() throws Exception {
-        sqlExpressions = new SqlExpressions(tableSources);
-        functions = sqlExpressions.getInstance(Functions.class);
+        sqlExpressions = new SqlExpressions(tableSources, nodeCtx);
         assertNormalize("current_schema()", isLiteral("doc"), false);
     }
 
     @Test
     public void testNormalizeCurrentSchemaCustomSchema() throws Exception {
-        sqlExpressions = new SqlExpressions(tableSources);
+        sqlExpressions = new SqlExpressions(tableSources, nodeCtx);
         sqlExpressions.setDefaultSchema("custom_schema");
-        functions = sqlExpressions.getInstance(Functions.class);
         assertNormalize("current_schema()", isLiteral("custom_schema"), false);
     }
 

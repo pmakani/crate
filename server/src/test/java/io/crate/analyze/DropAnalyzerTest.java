@@ -93,7 +93,7 @@ public class DropAnalyzerTest extends CrateDummyClusterServiceUnitTest {
             .build();
         ClusterServiceUtils.setState(clusterService, clusterState);
 
-        e = SQLExecutor.builder(clusterService).build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).build();
     }
 
     private ClusterUpdateSettingsRequest analyze(String stmt) {

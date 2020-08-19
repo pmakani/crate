@@ -41,7 +41,7 @@ public class ValuesAnalyzerTest extends CrateDummyClusterServiceUnitTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        e = SQLExecutor.builder(clusterService).build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).build();
     }
 
     @Test

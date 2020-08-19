@@ -96,7 +96,7 @@ public class CreateAlterTableStatementAnalyzerTest extends CrateDummyClusterServ
             .metadata(metadata)
             .build();
         ClusterServiceUtils.setState(clusterService, state);
-        e = SQLExecutor.builder(clusterService, 3, Randomness.get(), List.of())
+        e = SQLExecutor.builder(clusterService, nodeCtx, 3, Randomness.get(), List.of())
             .enableDefaultTables()
             .build();
         plannerContext = e.getPlannerContext(clusterService.state());
@@ -113,7 +113,7 @@ public class CreateAlterTableStatementAnalyzerTest extends CrateDummyClusterServ
             return (S) CreateTablePlan.bind(
                 (AnalyzedCreateTable) analyzedStatement,
                 plannerContext.transactionContext(),
-                plannerContext.functions(),
+                plannerContext.nodeContext(),
                 new RowN(arguments),
                 SubQueryResults.EMPTY,
                 new NumberOfShards(clusterService),
@@ -124,7 +124,7 @@ public class CreateAlterTableStatementAnalyzerTest extends CrateDummyClusterServ
             return (S) AlterTablePlan.bind(
                 (AnalyzedAlterTable) analyzedStatement,
                 plannerContext.transactionContext(),
-                plannerContext.functions(),
+                plannerContext.nodeContext(),
                 new RowN(arguments),
                 SubQueryResults.EMPTY
             );
@@ -132,7 +132,7 @@ public class CreateAlterTableStatementAnalyzerTest extends CrateDummyClusterServ
             return (S) AlterTableAddColumnPlan.bind(
                 (AnalyzedAlterTableAddColumn) analyzedStatement,
                 plannerContext.transactionContext(),
-                plannerContext.functions(),
+                plannerContext.nodeContext(),
                 new RowN(arguments),
                 SubQueryResults.EMPTY,
                 null
@@ -720,7 +720,7 @@ public class CreateAlterTableStatementAnalyzerTest extends CrateDummyClusterServ
         CreateBlobTablePlan.buildSettings(
             blobTable.createBlobTable(),
             plannerContext.transactionContext(),
-            plannerContext.functions(),
+            plannerContext.nodeContext(),
             new RowN(new Object[0]),
             SubQueryResults.EMPTY,
             new NumberOfShards(clusterService));
@@ -828,7 +828,7 @@ public class CreateAlterTableStatementAnalyzerTest extends CrateDummyClusterServ
 
     @Test
     public void testCreateTableUsesDefaultSchema() {
-        SQLExecutor sqlExecutor = SQLExecutor.builder(clusterService, 1, Randomness.get(), List.of())
+        SQLExecutor sqlExecutor = SQLExecutor.builder(clusterService, nodeCtx, 1, Randomness.get(), List.of())
             .setSearchPath("firstSchema", "secondSchema")
             .build();
 
@@ -870,7 +870,7 @@ public class CreateAlterTableStatementAnalyzerTest extends CrateDummyClusterServ
 
     @Test
     public void testExplicitSchemaHasPrecedenceOverDefaultSchema() {
-        SQLExecutor e = SQLExecutor.builder(clusterService).setSearchPath("hoschi").build();
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx).setSearchPath("hoschi").build();
         BoundCreateTable statement = analyze(e, "create table foo.bar (x string)");
 
         // schema from statement must take precedence
@@ -879,7 +879,7 @@ public class CreateAlterTableStatementAnalyzerTest extends CrateDummyClusterServ
 
     @Test
     public void testDefaultSchemaIsAddedToTableIdentIfNoExplicitSchemaExistsInTheStatement() {
-        SQLExecutor e = SQLExecutor.builder(clusterService).setSearchPath("hoschi").build();
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx).setSearchPath("hoschi").build();
         BoundCreateTable statement = analyze(e, "create table bar (x string)");
 
         assertThat(statement.tableIdent().schema(), is("hoschi"));
@@ -1239,7 +1239,7 @@ public class CreateAlterTableStatementAnalyzerTest extends CrateDummyClusterServ
 
     @Test
     public void testAlterTableAddColumnWithCheckConstraint() throws Exception {
-        SQLExecutor.builder(clusterService)
+        SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (" +
                       "    id int primary key, " +
                       "    qty int constraint check_qty_gt_zero check(qty > 0), " +
@@ -1296,7 +1296,7 @@ public class CreateAlterTableStatementAnalyzerTest extends CrateDummyClusterServ
 
     @Test
     public void testCreateTableFailsIfNameConflictsWithView() {
-        SQLExecutor executor = SQLExecutor.builder(clusterService)
+        SQLExecutor executor = SQLExecutor.builder(clusterService, nodeCtx)
             .addView(RelationName.fromIndexName("v1"), "Select * from t1")
             .build();
         expectedException.expect(RelationAlreadyExists.class);

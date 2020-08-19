@@ -39,7 +39,6 @@ import io.crate.metadata.RelationName;
 import io.crate.metadata.RowGranularity;
 import io.crate.metadata.Schemas;
 import io.crate.test.integration.CrateDummyClusterServiceUnitTest;
-import io.crate.testing.TestingHelpers;
 import io.crate.testing.TestingRowConsumer;
 import io.crate.types.DataTypes;
 import org.apache.lucene.util.BytesRef;
@@ -96,32 +95,32 @@ public class IndexWriterProjectorUnitTest extends CrateDummyClusterServiceUnitTe
 
         TransportCreatePartitionsAction transportCreatePartitionsAction = mock(TransportCreatePartitionsAction.class);
         IndexWriterProjector indexWriter = new IndexWriterProjector(
-            clusterService,
-            new NodeJobsCounter(),
-            scheduler,
-            executor,
-            CoordinatorTxnCtx.systemTransactionContext(),
-            TestingHelpers.getFunctions(),
-            Settings.EMPTY,
-            5,
-            1,
-            transportCreatePartitionsAction,
-            (request, listener) -> {},
-            IndexNameResolver.forTable(BULK_IMPORT_IDENT),
-            RAW_SOURCE_REFERENCE,
-            Collections.singletonList(ID_IDENT),
-            Collections.<Symbol>singletonList(new InputColumn(1)),
-            null,
-            null,
-            sourceInput,
-            collectExpressions,
-            20,
-            null,
-            null,
-            false,
-            false,
-            UUID.randomUUID(),
-            UpsertResultContext.forRowCount());
+                clusterService,
+                new NodeJobsCounter(),
+                scheduler,
+                executor,
+                CoordinatorTxnCtx.systemTransactionContext(),
+                nodeCtx,
+                Settings.EMPTY,
+                5,
+                1,
+                transportCreatePartitionsAction,
+                (request, listener) -> {},
+                IndexNameResolver.forTable(BULK_IMPORT_IDENT),
+                RAW_SOURCE_REFERENCE,
+                Collections.singletonList(ID_IDENT),
+                Collections.<Symbol>singletonList(new InputColumn(1)),
+                null,
+                null,
+                sourceInput,
+                collectExpressions,
+                20,
+                null,
+                null,
+                false,
+                false,
+                UUID.randomUUID(),
+                UpsertResultContext.forRowCount());
 
         RowN rowN = new RowN(new Object[]{new BytesRef("{\"y\": \"x\"}"), null});
         BatchIterator<Row> batchIterator = InMemoryBatchIterator.of(Collections.singletonList(rowN), SENTINEL, true);

@@ -57,7 +57,7 @@ public class LogicalPlannerTest extends CrateDummyClusterServiceUnitTest {
     @Before
     public void prepare() throws IOException {
         tableStats = new TableStats();
-        sqlExecutor = SQLExecutor.builder(clusterService)
+        sqlExecutor = SQLExecutor.builder(clusterService, nodeCtx)
             .enableDefaultTables()
             .setTableStats(tableStats)
             .addView(new RelationName("doc", "v2"), "select a, x from doc.t1")

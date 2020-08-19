@@ -64,7 +64,7 @@ public class CopyAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService).enableDefaultTables().build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).enableDefaultTables().build();
         plannerContext = e.getPlannerContext(clusterService.state());
     }
 
@@ -75,7 +75,7 @@ public class CopyAnalyzerTest extends CrateDummyClusterServiceUnitTest {
             return (S) CopyFromPlan.bind(
                 (AnalyzedCopyFrom) analyzedStatement,
                 plannerContext.transactionContext(),
-                plannerContext.functions(),
+                plannerContext.nodeContext(),
                 new RowN(arguments),
                 SubQueryResults.EMPTY
             );
@@ -83,7 +83,7 @@ public class CopyAnalyzerTest extends CrateDummyClusterServiceUnitTest {
             return (S) CopyToPlan.bind(
                 (AnalyzedCopyTo) analyzedStatement,
                 plannerContext.transactionContext(),
-                plannerContext.functions(),
+                plannerContext.nodeContext(),
                 new RowN(arguments),
                 SubQueryResults.EMPTY
             );

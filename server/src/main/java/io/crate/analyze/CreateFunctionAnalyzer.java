@@ -31,7 +31,6 @@ import io.crate.analyze.expressions.ExpressionAnalyzer;
 import io.crate.analyze.relations.FieldProvider;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.SearchPath;
 import io.crate.sql.tree.CreateFunction;
@@ -43,17 +42,16 @@ import static io.crate.analyze.FunctionArgumentDefinition.toFunctionArgumentDefi
 
 public class CreateFunctionAnalyzer {
 
-    private final Functions functions;
+    private final NodeContext nodeCtx;
 
-    CreateFunctionAnalyzer(Functions functions) {
-        this.functions = functions;
+    CreateFunctionAnalyzer(NodeContext nodeCtx) {
+        this.nodeCtx = nodeCtx;
     }
 
     public AnalyzedCreateFunction analyze(CreateFunction<Expression> node,
                                           ParamTypeHints paramTypeHints,
                                           CoordinatorTxnCtx txnCtx,
                                           SearchPath searchPath) {
-        var nodeCtx = new NodeContext(functions);
         var exprAnalyzerWithoutFields = new ExpressionAnalyzer(
             txnCtx, nodeCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
         var exprCtx = new ExpressionAnalysisContext();

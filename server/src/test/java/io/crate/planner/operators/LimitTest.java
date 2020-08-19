@@ -49,7 +49,7 @@ public class LimitTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testLimitOnLimitOperator() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService, 2, RandomizedTest.getRandom(), List.of())
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx, 2, RandomizedTest.getRandom(), List.of())
             .addTable(TableDefinitions.USER_TABLE_DEFINITION)
             .build();
         QueriedSelectRelation queriedDocTable = e.analyze("select name from users");
@@ -77,7 +77,7 @@ public class LimitTest extends CrateDummyClusterServiceUnitTest {
         PlannerContext ctx = e.getPlannerContext(clusterService.state());
         Merge merge = (Merge) plan.build(
             ctx,
-            new ProjectionBuilder(e.functions()),
+            new ProjectionBuilder(nodeCtx),
             TopN.NO_LIMIT,
             0,
             null,

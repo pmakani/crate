@@ -46,7 +46,7 @@ public class DropFunctionAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void initExecutor() throws Exception {
-        e = SQLExecutor.builder(clusterService).build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).build();
     }
 
     @Test

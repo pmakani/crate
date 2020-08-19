@@ -22,10 +22,15 @@
 
 package io.crate.metadata;
 
+import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.common.inject.Singleton;
+
+@Singleton
 public class NodeContext {
 
     private final Functions functions;
 
+    @Inject
     public NodeContext(Functions functions) {
         this.functions = functions;
     }

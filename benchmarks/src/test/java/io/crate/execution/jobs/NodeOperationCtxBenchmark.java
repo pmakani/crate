@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static io.crate.testing.TestingHelpers.createNodeContext;
 import static org.elasticsearch.test.ClusterServiceUtils.createClusterService;
 
 
@@ -68,7 +69,7 @@ public class NodeOperationCtxBenchmark {
         threadPool = new ThreadPool(Settings.builder().put(Node.NODE_NAME_SETTING.getKey(), "benchmarkNode").build());
         DiscoveryNode localNode = DiscoveryNodes.newNode("benchmarkNode", "n1");
         ClusterService clusterService = createClusterService(threadPool, localNode);
-        SQLExecutor e = SQLExecutor.builder(clusterService, 1, new Random(), List.of()).build();
+        SQLExecutor e = SQLExecutor.builder(clusterService, createNodeContext(), 1, new Random(), List.of()).build();
         ExecutionPlan executionPlan = e.plan("select name from sys.cluster group by name");
 
         NodeOperationTree nodeOperationTree = NodeOperationTreeGenerator.fromPlan(executionPlan, "n1");

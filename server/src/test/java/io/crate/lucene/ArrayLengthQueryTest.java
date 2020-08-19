@@ -52,6 +52,7 @@ public class ArrayLengthQueryTest extends CrateDummyClusterServiceUnitTest {
             createTempDir(),
             THREAD_POOL,
             clusterService,
+            nodeCtx,
             Version.CURRENT,
             "create table t (xs array(integer))"
         );
@@ -293,6 +294,7 @@ public class ArrayLengthQueryTest extends CrateDummyClusterServiceUnitTest {
                 createTempDir(),
                 THREAD_POOL,
                 clusterService,
+                nodeCtx,
                 Version.CURRENT,
                 "create table \"t_"+ type.getName() + "\" (xs array(\"" + type.getName() + "\"))"
             ).indexValues("xs", values).build()) {

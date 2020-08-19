@@ -42,7 +42,7 @@ public class CollectTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void test_prune_output_of_collect_updates_estimated_row_size() throws Exception {
-        var e = SQLExecutor.builder(clusterService)
+        var e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (x int, y int)")
             .build();
         TableStats tableStats = new TableStats();

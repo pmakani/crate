@@ -50,7 +50,7 @@ public class OptimizeTableAnalyzerTest extends CrateDummyClusterServiceUnitTest 
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .enableDefaultTables()
             .addBlobTable("create blob table blobs")
             .build();
@@ -62,7 +62,7 @@ public class OptimizeTableAnalyzerTest extends CrateDummyClusterServiceUnitTest 
         return OptimizeTablePlan.bind(
             analyzedStatement,
             plannerContext.transactionContext(),
-            plannerContext.functions(),
+            plannerContext.nodeContext(),
             new RowN(arguments),
             SubQueryResults.EMPTY
         );

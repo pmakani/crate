@@ -63,7 +63,7 @@ public class InsertAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .enableDefaultTables()
             .addTable(
                 "create table doc.users_generated (" +

@@ -74,7 +74,7 @@ public class InsertPlannerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService, 2, Randomness.get(), List.of())
+        e = SQLExecutor.builder(clusterService, nodeCtx, 2, Randomness.get(), List.of())
             .addPartitionedTable(
                 "create table parted_pks (" +
                 "   id int," +

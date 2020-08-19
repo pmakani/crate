@@ -27,7 +27,6 @@ import io.crate.expression.udf.UDFLanguage;
 import io.crate.expression.udf.UserDefinedFunctionMetadata;
 import io.crate.expression.udf.UserDefinedFunctionService;
 import io.crate.expression.udf.UserDefinedFunctionsMetadata;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.Scalar;
 import io.crate.metadata.TransactionContext;
@@ -47,18 +46,15 @@ import java.util.List;
 import java.util.Map;
 
 import static io.crate.metadata.SearchPath.pathWithPGCatalogAndDoc;
-import static io.crate.testing.TestingHelpers.getFunctions;
 
 public class DocSchemaInfoTest extends CrateDummyClusterServiceUnitTest {
 
     private DocSchemaInfo docSchemaInfo;
-    private Functions functions;
     private UserDefinedFunctionService udfService;
 
     @Before
     public void setup() throws Exception {
-        functions = getFunctions();
-        udfService = new UserDefinedFunctionService(clusterService, functions);
+        udfService = new UserDefinedFunctionService(clusterService, nodeCtx);
         udfService.registerLanguage(new UDFLanguage() {
             @Override
             public Scalar createFunctionImplementation(UserDefinedFunctionMetadata metadata,
@@ -99,7 +95,7 @@ public class DocSchemaInfoTest extends CrateDummyClusterServiceUnitTest {
                 return "burlesque";
             }
         });
-        docSchemaInfo = new DocSchemaInfo("doc", clusterService, functions, udfService,
+        docSchemaInfo = new DocSchemaInfo("doc", clusterService, nodeCtx, udfService,
             (ident, state) -> null, new TestingDocTableInfoFactory(Map.of()));
     }
 
@@ -118,10 +114,10 @@ public class DocSchemaInfoTest extends CrateDummyClusterServiceUnitTest {
 
         udfService.updateImplementations("my_schema", metadata.functionsMetadata().stream());
 
-        assertThat(functions.get("my_schema", "valid", List.of(), pathWithPGCatalogAndDoc()), Matchers.notNullValue());
+        assertThat(nodeCtx.functions().get("my_schema", "valid", List.of(), pathWithPGCatalogAndDoc()), Matchers.notNullValue());
 
         expectedException.expectMessage("Unknown function: my_schema.invalid()");
-        functions.get("my_schema", "invalid", List.of(), pathWithPGCatalogAndDoc());
+        nodeCtx.functions().get("my_schema", "invalid", List.of(), pathWithPGCatalogAndDoc());
     }
 
     @Test

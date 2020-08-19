@@ -29,7 +29,6 @@ import io.crate.common.collections.Lists2;
 import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.Schemas;
@@ -51,12 +50,12 @@ import static io.crate.metadata.RelationName.fromBlobTable;
 
 public class AlterTableRerouteAnalyzer {
 
-    private final Functions functions;
+    private final NodeContext nodeCtx;
     private final Schemas schemas;
     private final RerouteOptionVisitor rerouteOptionVisitor;
 
-    AlterTableRerouteAnalyzer(Functions functions, Schemas schemas) {
-        this.functions = functions;
+    AlterTableRerouteAnalyzer(NodeContext nodeCtx, Schemas schemas) {
+        this.nodeCtx = nodeCtx;
         this.schemas = schemas;
         this.rerouteOptionVisitor = new RerouteOptionVisitor();
     }
@@ -81,9 +80,8 @@ public class AlterTableRerouteAnalyzer {
             new Context(
                 tableInfo,
                 alterTableReroute.table().partitionProperties(),
-                functions,
                 transactionContext,
-                new NodeContext(functions),
+                nodeCtx,
                 paramTypeHints
             ));
     }
@@ -98,7 +96,6 @@ public class AlterTableRerouteAnalyzer {
 
         private Context(ShardedTable tableInfo,
                         List<Assignment<Expression>> partitionProperties,
-                        Functions functions,
                         CoordinatorTxnCtx txnCtx,
                         NodeContext nodeCtx,
                         ParamTypeHints paramTypeHints) {

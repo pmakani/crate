@@ -29,7 +29,6 @@ import io.crate.exceptions.VersioninigValidationException;
 import io.crate.expression.symbol.ParameterSymbol;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.NodeContext;
 import io.crate.metadata.PartitionName;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.TransactionContext;
@@ -59,7 +58,7 @@ public class DeletePlannerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .enableDefaultTables()
             .addPartitionedTable(
                 TableDefinitions.PARTED_PKS_TABLE_DEFINITION,
@@ -86,7 +85,6 @@ public class DeletePlannerTest extends CrateDummyClusterServiceUnitTest {
     @Test
     public void testMultiDeletePlan() throws Exception {
         DeleteById plan = e.plan("delete from users where id in (1, 2)");
-        NodeContext nodeCtx = new NodeContext(e.functions());
         assertThat(plan.docKeys().size(), is(2));
         List<String> docKeys = Lists.newArrayList(plan.docKeys())
             .stream()

@@ -35,7 +35,7 @@ public class AlterTableOpenCloseAnalyzerTest extends CrateDummyClusterServiceUni
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService).enableDefaultTables().build();
+        e = SQLExecutor.builder(clusterService, nodeCtx).enableDefaultTables().build();
     }
 
     @Test

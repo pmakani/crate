@@ -51,7 +51,7 @@ public class InputColumnsTest extends CrateDummyClusterServiceUnitTest {
         Map<RelationName, AnalyzedRelation> sources = T3.sources(List.of(T3.T1), clusterService);
 
         DocTableRelation tr1 = (DocTableRelation) sources.get(T3.T1);
-        sqlExpressions = new SqlExpressions(sources, tr1);
+        sqlExpressions = new SqlExpressions(sources, nodeCtx, tr1);
     }
 
     @Test

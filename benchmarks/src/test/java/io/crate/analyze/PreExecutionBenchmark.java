@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static io.crate.testing.TestingHelpers.createNodeContext;
 import static io.crate.testing.DiscoveryNodes.newNode;
 import static org.elasticsearch.test.ClusterServiceUtils.createClusterService;
 
@@ -74,7 +75,7 @@ public class PreExecutionBenchmark {
         DiscoveryNode localNode = newNode("benchmarkNode", "n1");
         ClusterService clusterService = createClusterService(threadPool, localNode);
         long dummySeed = 10;
-        e = SQLExecutor.builder(clusterService, 1, new Random(dummySeed), List.of())
+        e = SQLExecutor.builder(clusterService, createNodeContext(), 1, new Random(dummySeed), List.of())
             .addTable("create table users (id int primary key, name string, date timestamp, text string index using fulltext)")
             .build();
         selectStatement = SqlParser.createStatement("select name from users");

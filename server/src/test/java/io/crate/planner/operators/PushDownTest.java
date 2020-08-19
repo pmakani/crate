@@ -39,7 +39,7 @@ public class PushDownTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void setup() throws IOException {
-        sqlExecutor = SQLExecutor.builder(clusterService)
+        sqlExecutor = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable(T3.T1_DEFINITION)
             .addTable(T3.T2_DEFINITION)
             .addTable(TableDefinitions.USER_TABLE_DEFINITION)

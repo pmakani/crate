@@ -52,7 +52,7 @@ public class WindowDefinitionTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        e = SQLExecutor.builder(clusterService, 1, RandomizedTest.getRandom(), List.of())
+        e = SQLExecutor.builder(clusterService, nodeCtx, 1, RandomizedTest.getRandom(), List.of())
             .addTable(TableDefinitions.USER_TABLE_DEFINITION)
             .build();
     }

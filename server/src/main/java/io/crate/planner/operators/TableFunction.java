@@ -81,7 +81,7 @@ public final class TableFunction implements LogicalPlan {
         List<Symbol> args = relation.function().arguments();
         ArrayList<Literal<?>> functionArguments = new ArrayList<>(args.size());
         EvaluatingNormalizer normalizer = new EvaluatingNormalizer(
-            plannerContext.functions(),
+            plannerContext.nodeContext(),
             RowGranularity.CLUSTER,
             null,
             relation

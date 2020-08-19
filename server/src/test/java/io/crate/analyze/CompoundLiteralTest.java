@@ -53,7 +53,7 @@ public class CompoundLiteralTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() {
-        expressions = new SqlExpressions(T3.sources(clusterService));
+        expressions = new SqlExpressions(T3.sources(clusterService), nodeCtx);
     }
 
     @Test

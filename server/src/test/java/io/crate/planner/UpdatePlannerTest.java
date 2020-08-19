@@ -75,11 +75,11 @@ public class UpdatePlannerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        e = buildExecutor(clusterService);
+        e = buildExecutor(clusterService, nodeCtx);
     }
 
-    private static SQLExecutor buildExecutor(ClusterService clusterService) throws IOException {
-        return SQLExecutor.builder(clusterService, 2, RandomizedTest.getRandom(), List.of())
+    private static SQLExecutor buildExecutor(ClusterService clusterService, NodeContext nodeCtx) throws IOException {
+        return SQLExecutor.builder(clusterService, nodeCtx, 2, RandomizedTest.getRandom(), List.of())
             .enableDefaultTables()
             .addPartitionedTable(
                 TableDefinitions.PARTED_PKS_TABLE_DEFINITION,
@@ -127,7 +127,7 @@ public class UpdatePlannerTest extends CrateDummyClusterServiceUnitTest {
         assertThat(updateById.assignmentByTargetCol().values(), contains(isLiteral("Vogon lyric fan")));
         assertThat(updateById.docKeys().size(), is(1));
 
-        assertThat(updateById.docKeys().getOnlyKey().getId(txnCtx, new NodeContext(e.functions()), Row.EMPTY, SubQueryResults.EMPTY), is("1"));
+        assertThat(updateById.docKeys().getOnlyKey().getId(txnCtx, nodeCtx, Row.EMPTY, SubQueryResults.EMPTY), is("1"));
     }
 
     @Test
@@ -186,7 +186,7 @@ public class UpdatePlannerTest extends CrateDummyClusterServiceUnitTest {
         // Make sure the former initialized cluster service is shutdown
         cleanup();
         this.clusterService = createClusterService(additionalClusterSettings(), Version.V_4_1_0);
-        e = buildExecutor(clusterService);
+        e = buildExecutor(clusterService, nodeCtx);
         expectedException.expect(UnsupportedFeatureException.class);
         expectedException.expectMessage(UpdatePlanner.RETURNING_VERSION_ERROR_MSG);
         e.plan("update users set name='test' where id=1 returning id");

@@ -42,7 +42,7 @@ public class SelectFromViewAnalyzerTest extends CrateDummyClusterServiceUnitTest
 
     @Before
     public void setUpExecutor() throws Exception {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table doc.t1 (name string, x int)")
             .addView(new RelationName("doc", "v1"), "select name, count(*) from doc.t1 group by name")
             .build();

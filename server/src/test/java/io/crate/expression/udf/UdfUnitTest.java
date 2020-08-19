@@ -33,12 +33,11 @@ import org.elasticsearch.cluster.service.ClusterService;
 import javax.annotation.Nullable;
 import javax.script.ScriptException;
 
-import static io.crate.testing.TestingHelpers.getFunctions;
 import static org.mockito.Mockito.mock;
 
 public abstract class UdfUnitTest extends CrateDummyClusterServiceUnitTest {
 
-    UserDefinedFunctionService udfService = new UserDefinedFunctionService(mock(ClusterService.class), getFunctions());
+    UserDefinedFunctionService udfService = new UserDefinedFunctionService(mock(ClusterService.class), nodeCtx);
 
     static final UDFLanguage DUMMY_LANG = new UDFLanguage() {
         @Override

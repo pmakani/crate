@@ -41,7 +41,7 @@ public class PgFunctionIsVisibleFunctionTest extends AbstractScalarFunctionsTest
     public void test_system_function_visibility() {
         assertEvaluate("pg_function_is_visible(0)",false);
         assertEvaluate("pg_function_is_visible(-14)",false);
-        for (List<FunctionProvider> providers : functions.functionResolvers().values()) {
+        for (List<FunctionProvider> providers : nodeCtx.functions().functionResolvers().values()) {
             for (FunctionProvider sysFunc : providers) {
                 Signature signature = sysFunc.getSignature();
                 Integer funcOid = OidHash.functionOid(signature);

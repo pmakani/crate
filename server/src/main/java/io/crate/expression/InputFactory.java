@@ -37,7 +37,6 @@ import io.crate.expression.symbol.InputColumn;
 import io.crate.expression.symbol.Symbol;
 import io.crate.expression.symbol.SymbolVisitor;
 import io.crate.metadata.FunctionImplementation;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.TransactionContext;
@@ -73,10 +72,10 @@ import java.util.Map;
  */
 public class InputFactory {
 
-    private final Functions functions;
+    private final NodeContext nodeCtx;
 
-    public InputFactory(Functions functions) {
-        this.functions = functions;
+    public InputFactory(NodeContext nodeCtx) {
+        this.nodeCtx = nodeCtx;
     }
 
     public <T extends Input<?>> Context<T> ctxForRefs(TransactionContext txnCtx, ReferenceResolver<? extends T> referenceResolver) {
@@ -85,13 +84,13 @@ public class InputFactory {
             expressions,
             new RefVisitor<>(
                 txnCtx,
-                new NodeContext(functions),
+                nodeCtx,
                 new GatheringRefResolver<>(expressions::add, referenceResolver)));
     }
 
     public Context<CollectExpression<Row, ?>> ctxForInputColumns(TransactionContext txnCtx) {
         List<CollectExpression<Row, ?>> expressions = new ArrayList<>();
-        return new Context<>(expressions, new InputColumnVisitor(txnCtx, new NodeContext(functions), expressions));
+        return new Context<>(expressions, new InputColumnVisitor(txnCtx, nodeCtx, expressions));
     }
 
     public Context<CollectExpression<Row, ?>> ctxForInputColumns(TransactionContext txnCtx, Iterable<? extends Symbol> symbols) {
@@ -106,7 +105,7 @@ public class InputFactory {
         return new Context<>(
             expressions,
             aggregationContexts,
-            new AggregationVisitor(txnCtx, new NodeContext(functions), expressions, aggregationContexts));
+            new AggregationVisitor(txnCtx, nodeCtx, expressions, aggregationContexts));
     }
 
     public static class Context<T extends Input<?>> {

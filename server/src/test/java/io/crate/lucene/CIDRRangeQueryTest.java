@@ -63,6 +63,7 @@ public class CIDRRangeQueryTest extends CrateDummyClusterServiceUnitTest {
             createTempDir(),
             THREAD_POOL,
             clusterService,
+            nodeCtx,
             Version.CURRENT,
             "create table t (ip_addr ip)"
         );

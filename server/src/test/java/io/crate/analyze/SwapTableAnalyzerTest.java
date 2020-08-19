@@ -36,7 +36,7 @@ public class SwapTableAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void setUpExecutorWithT1AndT2() throws Exception {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t1 (x int)")
             .addTable("create table t2 (x long)")
             .build();

@@ -30,8 +30,6 @@ import org.elasticsearch.cluster.routing.IndexShardRoutingTable;
 import org.elasticsearch.cluster.routing.RoutingTable;
 import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.Randomness;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.util.concurrent.ThreadContext;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.test.ClusterServiceUtils;
 import org.junit.Test;
@@ -47,7 +45,7 @@ public class ShardStateObserverTest extends CrateDummyClusterServiceUnitTest {
     @Test
     public void test_wait_for_active_shard_completes_on_shard_state_change() throws Throwable {
         // Add 2 nodes and table to cluster state
-        SQLExecutor.builder(clusterService, 2, Randomness.get(), List.of())
+        SQLExecutor.builder(clusterService, nodeCtx, 2, Randomness.get(), List.of())
             .addTable("create table t1 (x int) clustered into 1 shards");
 
         var observer = new ShardStateObserver(clusterService);

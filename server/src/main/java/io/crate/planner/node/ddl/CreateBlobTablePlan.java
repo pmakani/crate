@@ -35,7 +35,6 @@ import io.crate.data.RowConsumer;
 import io.crate.execution.support.OneRowActionListener;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.RelationName;
 import io.crate.planner.DependencyCarrier;
@@ -80,7 +79,7 @@ public class CreateBlobTablePlan implements Plan {
         Settings settings = buildSettings(
             analyzedBlobTable.createBlobTable(),
             plannerContext.transactionContext(),
-            plannerContext.functions(),
+            dependencies.nodeContext(),
             params,
             subQueryResults,
             numberOfShards);
@@ -95,13 +94,13 @@ public class CreateBlobTablePlan implements Plan {
     @VisibleForTesting
     public static Settings buildSettings(CreateBlobTable<Symbol> createBlobTable,
                                          CoordinatorTxnCtx txnCtx,
-                                         Functions functions,
+                                         NodeContext nodeCtx,
                                          Row params,
                                          SubQueryResults subQueryResults,
                                          NumberOfShards numberOfShards) {
         Function<? super Symbol, Object> eval = x -> SymbolEvaluator.evaluate(
             txnCtx,
-            new NodeContext(functions),
+            nodeCtx,
             x,
             params,
             subQueryResults

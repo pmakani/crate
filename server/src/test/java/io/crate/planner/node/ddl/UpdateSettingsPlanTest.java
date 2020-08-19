@@ -30,7 +30,6 @@ import io.crate.expression.scalar.arithmetic.ArrayFunction;
 import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.ParameterSymbol;
 import io.crate.expression.symbol.Symbol;
-import io.crate.metadata.NodeContext;
 import io.crate.metadata.SearchPath;
 import io.crate.metadata.TransactionContext;
 import io.crate.metadata.settings.SessionSettings;
@@ -46,7 +45,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static io.crate.planner.node.ddl.UpdateSettingsPlan.buildSettingsFrom;
-import static io.crate.testing.TestingHelpers.getFunctions;
+import static io.crate.testing.TestingHelpers.createNodeContext;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 
@@ -54,11 +53,11 @@ public class UpdateSettingsPlanTest extends ESTestCase {
 
     private Function<Symbol, Object> symbolEvaluator(Row row) {
         return x -> SymbolEvaluator.evaluate(
-            TransactionContext.of(new SessionSettings("", SearchPath.createSearchPathFrom(""))),
-            new NodeContext(getFunctions()),
-            x,
-            row,
-            SubQueryResults.EMPTY);
+                TransactionContext.of(new SessionSettings("", SearchPath.createSearchPathFrom(""))),
+                createNodeContext(),
+                x,
+                row,
+                SubQueryResults.EMPTY);
     }
 
     @Test

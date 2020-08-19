@@ -29,7 +29,6 @@ import io.crate.common.collections.Lists2;
 import io.crate.execution.ddl.RepositoryService;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.sql.tree.Expression;
 import io.crate.sql.tree.GenericProperties;
@@ -41,11 +40,11 @@ import java.util.List;
 class RestoreSnapshotAnalyzer {
 
     private final RepositoryService repositoryService;
-    private final Functions functions;
+    private final NodeContext nodeCtx;
 
-    RestoreSnapshotAnalyzer(RepositoryService repositoryService, Functions functions) {
+    RestoreSnapshotAnalyzer(RepositoryService repositoryService, NodeContext nodeCtx) {
         this.repositoryService = repositoryService;
-        this.functions = functions;
+        this.nodeCtx = nodeCtx;
     }
 
     public AnalyzedRestoreSnapshot analyze(RestoreSnapshot<Expression> restoreSnapshot,
@@ -61,7 +60,6 @@ class RestoreSnapshotAnalyzer {
         repositoryService.failIfRepositoryDoesNotExist(repositoryName);
 
         var exprCtx = new ExpressionAnalysisContext();
-        var nodeCtx = new NodeContext(functions);
         var exprAnalyzerWithoutFields = new ExpressionAnalyzer(
             txnCtx, nodeCtx, paramTypeHints, FieldProvider.UNSUPPORTED, null);
         var exprAnalyzerWithFieldsAsString = new ExpressionAnalyzer(

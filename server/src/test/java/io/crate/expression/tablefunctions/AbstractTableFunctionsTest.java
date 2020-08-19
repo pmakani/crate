@@ -30,7 +30,6 @@ import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.Reference;
 import io.crate.metadata.ReferenceIdent;
 import io.crate.metadata.RelationName;
@@ -48,6 +47,7 @@ import org.junit.Before;
 
 import java.util.Map;
 
+import static io.crate.testing.TestingHelpers.createNodeContext;
 import static io.crate.testing.TestingHelpers.printedTable;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.instanceOf;
@@ -59,7 +59,6 @@ import static org.mockito.Mockito.any;
 public abstract class AbstractTableFunctionsTest extends ESTestCase {
 
     protected SqlExpressions sqlExpressions;
-    protected Functions functions;
     protected TransactionContext txnCtx = CoordinatorTxnCtx.systemTransactionContext();
 
     @Before
@@ -74,15 +73,14 @@ public abstract class AbstractTableFunctionsTest extends ESTestCase {
                 DataTypes.STRING,
                 0,
                 null));
-        sqlExpressions = new SqlExpressions(Map.of(relationName, relation));
-        functions = sqlExpressions.getInstance(Functions.class);
+        sqlExpressions = new SqlExpressions(Map.of(relationName, relation), createNodeContext());
     }
 
     protected Iterable<Row> execute(String expr) {
         Symbol functionSymbol = sqlExpressions.normalize(sqlExpressions.asSymbol(expr));
 
         var function = (Function) functionSymbol;
-        var functionImplementation = (TableFunctionImplementation<?>) functions.getQualified(
+        var functionImplementation = (TableFunctionImplementation<?>) sqlExpressions.nodeCtx.functions().getQualified(
             function,
             txnCtx.sessionSettings().searchPath()
         );
@@ -109,7 +107,7 @@ public abstract class AbstractTableFunctionsTest extends ESTestCase {
         functionSymbol = sqlExpressions.normalize(functionSymbol);
         assertThat("function expression was normalized, compile would not be hit", functionSymbol, not(instanceOf(Literal.class)));
         Function function = (Function) functionSymbol;
-        Scalar scalar = (Scalar) functions.getQualified(function, txnCtx.sessionSettings().searchPath());
+        Scalar scalar = (Scalar) sqlExpressions.nodeCtx.functions().getQualified(function, txnCtx.sessionSettings().searchPath());
         assertThat("Function implementation not found using full qualified lookup", scalar, Matchers.notNullValue());
         Scalar compiled = scalar.compile(function.arguments());
         assertThat(compiled, matcher.apply(scalar));

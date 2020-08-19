@@ -47,7 +47,7 @@ public class CreateViewAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void setUpExecutor() throws IOException {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .setUser(testUser)
             .addTable("create table t1 (x int)")
             .build();
@@ -70,7 +70,7 @@ public class CreateViewAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testCreateViewCreatesViewInDefaultSchema() {
-        SQLExecutor sqlExecutor = SQLExecutor.builder(clusterService)
+        SQLExecutor sqlExecutor = SQLExecutor.builder(clusterService, nodeCtx)
             .setSearchPath("firstSchema", "secondSchema")
             .build();
         CreateViewStmt createView = sqlExecutor.analyze("create view v1 as select * from sys.nodes");

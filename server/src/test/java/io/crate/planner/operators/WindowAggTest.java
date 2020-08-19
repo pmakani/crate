@@ -26,7 +26,6 @@ import io.crate.analyze.OrderBy;
 import io.crate.analyze.WindowDefinition;
 import io.crate.expression.symbol.Symbol;
 import io.crate.expression.symbol.WindowFunction;
-import io.crate.statistics.TableStats;
 import io.crate.test.integration.CrateDummyClusterServiceUnitTest;
 import io.crate.testing.SQLExecutor;
 import org.hamcrest.Matchers;
@@ -45,7 +44,7 @@ public class WindowAggTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void init() throws Exception {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t1 (x int, y int)")
             .build();
     }

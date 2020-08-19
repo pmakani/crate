@@ -62,7 +62,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static io.crate.testing.TestingHelpers.getFunctions;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
@@ -90,7 +89,7 @@ public class GroupByOptimizedIteratorTest extends CrateDummyClusterServiceUnitTe
         indexSearcher = new IndexSearcher(DirectoryReader.open(iw));
 
         inExpr = new InputCollectExpression(0);
-        CountAggregation aggregation = (CountAggregation) getFunctions().getQualified(
+        CountAggregation aggregation = (CountAggregation) nodeCtx.functions().getQualified(
             CountAggregation.COUNT_STAR_SIGNATURE,
             Collections.emptyList(),
             CountAggregation.COUNT_STAR_SIGNATURE.getReturnType().createType()

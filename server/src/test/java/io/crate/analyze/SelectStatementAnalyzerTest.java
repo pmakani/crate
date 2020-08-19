@@ -102,7 +102,7 @@ public class SelectStatementAnalyzerTest extends CrateDummyClusterServiceUnitTes
 
     @Before
     public void prepare() throws IOException {
-        sqlExecutor = SQLExecutor.builder(clusterService)
+        sqlExecutor = SQLExecutor.builder(clusterService, nodeCtx)
             .enableDefaultTables()
             .addTable("create table foo.users (id bigint primary key, name text)")
             .addTable("create table fooobar (id bigint primary key, name text)")
@@ -127,7 +127,7 @@ public class SelectStatementAnalyzerTest extends CrateDummyClusterServiceUnitTes
 
     @Test
     public void testQueryUsesSearchPath() throws IOException {
-        SQLExecutor executor = SQLExecutor.builder(clusterService)
+        SQLExecutor executor = SQLExecutor.builder(clusterService, nodeCtx)
             .setSearchPath("first", "second", "third")
             .addTable("create table \"first\".t (id int)")
             .addTable("create table third.t1 (id int)")
@@ -1839,7 +1839,7 @@ public class SelectStatementAnalyzerTest extends CrateDummyClusterServiceUnitTes
 
     @Test
     public void testCustomSchemaSubSelectWithAccessToParentRelation() throws Exception {
-        SQLExecutor sqlExecutor2 = SQLExecutor.builder(clusterService)
+        SQLExecutor sqlExecutor2 = SQLExecutor.builder(clusterService, nodeCtx)
             .setSearchPath("foo")
             .addTable("create table foo.t1 (id bigint primary key, name text)")
             .build();

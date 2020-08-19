@@ -57,17 +57,17 @@ public class UpdateSourceGenTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testSetXBasedOnXAndPartitionedColumn() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addPartitionedTable("create table t (x int, p int) partitioned by (p)",
                 new PartitionName(new RelationName("doc", "t"), Collections.singletonList("1")).asIndexName())
             .build();
 
         AnalyzedUpdateStatement update = e.analyze("update t set x = x + p");
-        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), e.functions());
+        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), nodeCtx);
         DocTableInfo table = (DocTableInfo) update.table().tableInfo();
         UpdateSourceGen updateSourceGen = new UpdateSourceGen(
-            e.functions(),
             txnCtx,
+            nodeCtx,
             table,
             assignments.targetNames()
         );
@@ -98,15 +98,15 @@ public class UpdateSourceGenTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testSourceGenerationWithAssignmentUsingDocumentPrimaryKey() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (y int)")
             .build();
         AnalyzedUpdateStatement update = e.analyze("update t set y = _id::integer * 2");
-        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), e.functions());
+        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), nodeCtx);
         DocTableInfo table = (DocTableInfo) update.table().tableInfo();
         UpdateSourceGen updateSourceGen = new UpdateSourceGen(
-            e.functions(),
             txnCtx,
+            nodeCtx,
             table,
             assignments.targetNames()
         );
@@ -134,15 +134,15 @@ public class UpdateSourceGenTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testNestedGeneratedColumnIsGenerated() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (x int, obj object as (y as x + 1))")
             .build();
         AnalyzedUpdateStatement update = e.analyze("update t set x = 4");
-        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), e.functions());
+        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), nodeCtx);
         DocTableInfo table = (DocTableInfo) update.table().tableInfo();
         UpdateSourceGen updateSourceGen = new UpdateSourceGen(
-            e.functions(),
             txnCtx,
+            nodeCtx,
             table,
             assignments.targetNames()
         );
@@ -166,15 +166,15 @@ public class UpdateSourceGenTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testGeneratedColumnUsingFunctionDependingOnActiveTransaction() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (x int, gen as current_schema)")
             .build();
         AnalyzedUpdateStatement update = e.analyze("update t set x = 1");
-        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), e.functions());
+        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), nodeCtx);
         DocTableInfo table = (DocTableInfo) update.table().tableInfo();
         UpdateSourceGen sourceGen = new UpdateSourceGen(
-            e.functions(),
             TransactionContext.of(DUMMY_SESSION_INFO),
+            nodeCtx,
             table,
             assignments.targetNames()
         );
@@ -190,15 +190,15 @@ public class UpdateSourceGenTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testNestedGeneratedColumnRaiseErrorIfGivenByUserDoesNotMatch() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (x int, obj object as (y as 'foo'))")
             .build();
         AnalyzedUpdateStatement update = e.analyze("update t set x = 4, obj = {y='bar'}");
-        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), e.functions());
+        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), nodeCtx);
         DocTableInfo table = (DocTableInfo) update.table().tableInfo();
         UpdateSourceGen updateSourceGen = new UpdateSourceGen(
-            e.functions(),
             txnCtx,
+            nodeCtx,
             table,
             assignments.targetNames()
         );
@@ -223,15 +223,15 @@ public class UpdateSourceGenTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testNestedGeneratedColumnIsGeneratedValidateValueIfGivenByUser() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (x int, obj object as (y as 'foo'))")
             .build();
         AnalyzedUpdateStatement update = e.analyze("update t set x = 4, obj = {y='foo'}");
-        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), e.functions());
+        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), nodeCtx);
         DocTableInfo table = (DocTableInfo) update.table().tableInfo();
         UpdateSourceGen updateSourceGen = new UpdateSourceGen(
-            e.functions(),
             txnCtx,
+            nodeCtx,
             table,
             assignments.targetNames()
         );
@@ -254,15 +254,15 @@ public class UpdateSourceGenTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void test_update_child_of_object_column_that_is_null_implicitly_creates_the_object() throws Exception {
-        SQLExecutor e = SQLExecutor.builder(clusterService)
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table t (obj object as (x int))")
             .build();
         AnalyzedUpdateStatement update = e.analyze("update t set obj['x'] = 10");
-        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), e.functions());
+        Assignments assignments = Assignments.convert(update.assignmentByTargetCol(), nodeCtx);
         DocTableInfo table = (DocTableInfo) update.table().tableInfo();
         UpdateSourceGen updateSourceGen = new UpdateSourceGen(
-            e.functions(),
             txnCtx,
+            nodeCtx,
             table,
             assignments.targetNames()
         );

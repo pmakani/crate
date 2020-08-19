@@ -21,14 +21,11 @@
 
 package io.crate.analyze;
 
-import io.crate.expression.symbol.Literal;
 import io.crate.metadata.PartitionName;
 import io.crate.metadata.RelationName;
 import io.crate.metadata.doc.DocTableInfo;
 import io.crate.sql.tree.Assignment;
 import io.crate.sql.tree.QualifiedName;
-import io.crate.sql.tree.QualifiedNameReference;
-import io.crate.sql.tree.StringLiteral;
 import io.crate.test.integration.CrateDummyClusterServiceUnitTest;
 import io.crate.testing.SQLExecutor;
 import org.hamcrest.Matchers;
@@ -52,7 +49,7 @@ public class PartitionPropertiesAnalyzerTest extends CrateDummyClusterServiceUni
         DocTableInfo tableInfo = SQLExecutor.partitionedTableInfo(
             new RelationName("doc", "users"),
             "create table doc.users (name text primary key) partitioned by (name)",
-            clusterService);
+            clusterService, nodeCtx);
 
         PartitionName partitionName = getPartitionName(tableInfo);
         assertThat(partitionName.values(), Matchers.contains("foo"));
@@ -64,7 +61,7 @@ public class PartitionPropertiesAnalyzerTest extends CrateDummyClusterServiceUni
         DocTableInfo tableInfo = SQLExecutor.tableInfo(
             new RelationName("doc", "users"),
             "create table doc.users (name text primary key)",
-            clusterService);
+            clusterService, nodeCtx);
 
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("table 'doc.users' is not partitioned");

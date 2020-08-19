@@ -55,7 +55,7 @@ public class SubSelectAnalyzerTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws IOException {
-        executor = SQLExecutor.builder(clusterService).enableDefaultTables().build();
+        executor = SQLExecutor.builder(clusterService, nodeCtx).enableDefaultTables().build();
         t1Info = executor.schemas().getTableInfo(new RelationName("doc", "t1"));
     }
 

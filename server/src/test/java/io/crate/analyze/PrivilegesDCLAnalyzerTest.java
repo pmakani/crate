@@ -67,7 +67,7 @@ public class PrivilegesDCLAnalyzerTest extends CrateDummyClusterServiceUnitTest 
 
     @Before
     public void setUpSQLExecutor() throws Exception {
-        e = SQLExecutor.builder(clusterService).enableDefaultTables()
+        e = SQLExecutor.builder(clusterService, nodeCtx).enableDefaultTables()
             .addTable("create table my_schema.locations (id int)")
             .addView(new RelationName("my_schema", "locations_view"),
                      "select * from my_schema.locations limit 2")
@@ -281,7 +281,7 @@ public class PrivilegesDCLAnalyzerTest extends CrateDummyClusterServiceUnitTest 
 
     @Test
     public void testGrantWithoutUserManagementEnabledThrowsException() {
-        e = SQLExecutor.builder(clusterService)
+        e = SQLExecutor.builder(clusterService, nodeCtx)
             .setUserManager(new StubUserManager())
             .build();
 

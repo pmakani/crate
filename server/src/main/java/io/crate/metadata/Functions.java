@@ -121,7 +121,6 @@ public class Functions {
     public FunctionImplementation get(@Nullable String suppliedSchema,
                                       String functionName,
                                       List<Symbol> arguments,
-
                                       SearchPath searchPath) {
         FunctionName fqnName = new FunctionName(suppliedSchema, functionName);
         FunctionImplementation func = getBuiltinByArgs(fqnName, arguments, searchPath);

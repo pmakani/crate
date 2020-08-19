@@ -32,7 +32,7 @@ public class SQLExecutorTest extends CrateDummyClusterServiceUnitTest {
     public void testAddDuplicateTableThrowsException() throws Exception {
         expectedException.expect(RelationAlreadyExists.class);
 
-        SQLExecutor.builder(clusterService)
+        SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table foo (id int)")
             .addTable("create table foo (id text)")
             .build();
@@ -40,12 +40,12 @@ public class SQLExecutorTest extends CrateDummyClusterServiceUnitTest {
 
     @Test
     public void testAddDuplicateTableOnSameClusterStateThrowsException() throws Exception {
-        SQLExecutor.builder(clusterService)
+        SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table foo (id text)")
             .build();
 
         expectedException.expect(RelationAlreadyExists.class);
-        SQLExecutor.builder(clusterService)
+        SQLExecutor.builder(clusterService, nodeCtx)
             .addTable("create table foo (id int)")
             .build();
     }

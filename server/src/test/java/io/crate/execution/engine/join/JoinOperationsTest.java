@@ -53,7 +53,7 @@ public class JoinOperationsTest extends CrateDummyClusterServiceUnitTest {
     public void prepare() throws Exception {
         Map<RelationName, AnalyzedRelation> sources =
             T3.sources(List.of(T3.T1, T3.T2, T3.T3), clusterService);
-        expressions = new SqlExpressions(sources);
+        expressions = new SqlExpressions(sources, nodeCtx);
     }
 
     private Symbol asSymbol(String expression) {

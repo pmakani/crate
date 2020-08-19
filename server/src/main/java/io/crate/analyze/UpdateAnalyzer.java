@@ -40,7 +40,6 @@ import io.crate.expression.symbol.Literal;
 import io.crate.expression.symbol.Symbol;
 import io.crate.metadata.ColumnIdent;
 import io.crate.metadata.CoordinatorTxnCtx;
-import io.crate.metadata.Functions;
 import io.crate.metadata.NodeContext;
 import io.crate.metadata.Reference;
 import io.crate.metadata.RowGranularity;
@@ -72,11 +71,11 @@ public final class UpdateAnalyzer {
         input -> input.valueType().id() == ArrayType.ID
                  && ((ArrayType<?>) input.valueType()).innerType().id() == ObjectType.ID;
 
-    private final Functions functions;
+    private final NodeContext nodeCtx;
     private final RelationAnalyzer relationAnalyzer;
 
-    UpdateAnalyzer(Functions functions, RelationAnalyzer relationAnalyzer) {
-        this.functions = functions;
+    UpdateAnalyzer(NodeContext nodeCtx, RelationAnalyzer relationAnalyzer) {
+        this.nodeCtx = nodeCtx;
         this.relationAnalyzer = relationAnalyzer;
     }
 
@@ -102,13 +101,13 @@ public final class UpdateAnalyzer {
             throw new UnsupportedOperationException("UPDATE is only supported on base-tables");
         }
         AbstractTableRelation<?> table = (AbstractTableRelation<?>) relation;
-        EvaluatingNormalizer normalizer = new EvaluatingNormalizer(functions, RowGranularity.CLUSTER, null, table);
+        EvaluatingNormalizer normalizer = new EvaluatingNormalizer(nodeCtx, RowGranularity.CLUSTER, null, table);
         SubqueryAnalyzer subqueryAnalyzer =
             new SubqueryAnalyzer(relationAnalyzer, new StatementAnalysisContext(typeHints, Operation.READ, txnCtx));
 
         ExpressionAnalyzer sourceExprAnalyzer = new ExpressionAnalyzer(
             txnCtx,
-            new NodeContext(functions),
+            nodeCtx,
             typeHints,
             new FullQualifiedNameFieldProvider(
                 relCtx.sources(),
@@ -155,7 +154,7 @@ public final class UpdateAnalyzer {
         HashMap<Reference, Symbol> assignmentByTargetCol = new HashMap<>();
         ExpressionAnalyzer targetExprAnalyzer = new ExpressionAnalyzer(
             txnCtx,
-            new NodeContext(functions),
+            nodeCtx,
             typeHints,
             new NameFieldProvider(table),
             subqueryAnalyzer,

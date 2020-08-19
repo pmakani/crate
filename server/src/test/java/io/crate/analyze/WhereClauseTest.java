@@ -37,7 +37,7 @@ public class WhereClauseTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() {
-        sqlExpressions = new SqlExpressions(T3.sources(clusterService));
+        sqlExpressions = new SqlExpressions(T3.sources(clusterService), nodeCtx);
     }
 
     @Test

@@ -50,7 +50,7 @@ public class HashJoinConditionSymbolsExtractorTest extends CrateDummyClusterServ
     @Before
     public void prepare() throws Exception {
         Map<RelationName, AnalyzedRelation> sources = T3.sources(clusterService);
-        sqlExpressions = new SqlExpressions(sources);
+        sqlExpressions = new SqlExpressions(sources, nodeCtx);
         tr1 = sources.get(T3.T1);
         tr2 = sources.get(T3.T2);
     }

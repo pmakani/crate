@@ -76,9 +76,10 @@ public class SymbolPrinterTest extends CrateDummyClusterServiceUnitTest {
         DocTableInfo tableInfo = SQLExecutor.tableInfo(
             name,
             createTableStmt,
-            clusterService);
+            clusterService,
+            nodeCtx);
         Map<RelationName, AnalyzedRelation> sources = Map.of(name, new TableRelation(tableInfo));
-        sqlExpressions = new SqlExpressions(sources);
+        sqlExpressions = new SqlExpressions(sources, nodeCtx);
     }
 
     private void assertPrint(Symbol s, String formatted) {

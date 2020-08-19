@@ -86,15 +86,16 @@ public class PostgresWireProtocolTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() {
-        SQLExecutor e = SQLExecutor.builder(clusterService).build();
+        SQLExecutor e = SQLExecutor.builder(clusterService, nodeCtx).build();
         sqlOperations = new SQLOperations(
-            e.analyzer,
-            e.planner,
-            () -> mock(DependencyCarrier.class),
-            new JobsLogs(() -> true),
-            Settings.EMPTY,
-            clusterService,
-            USER_MANAGER_PROVIDER
+                nodeCtx,
+                e.analyzer,
+                e.planner,
+                () -> mock(DependencyCarrier.class),
+                new JobsLogs(() -> true),
+                Settings.EMPTY,
+                clusterService,
+                USER_MANAGER_PROVIDER
         ) {
             @Override
             public Session createSession(@Nullable String defaultSchema, @Nullable User user) {

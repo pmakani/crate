@@ -34,7 +34,6 @@ import org.junit.Test;
 
 import java.util.function.Function;
 
-import static io.crate.testing.TestingHelpers.getFunctions;
 import static org.hamcrest.Matchers.is;
 
 public class NullEliminatorTest extends CrateDummyClusterServiceUnitTest {
@@ -43,7 +42,7 @@ public class NullEliminatorTest extends CrateDummyClusterServiceUnitTest {
 
     @Before
     public void prepare() throws Exception {
-        sqlExpressions = new SqlExpressions(T3.sources(clusterService));
+        sqlExpressions = new SqlExpressions(T3.sources(clusterService), nodeCtx);
     }
 
     private void assertReplaced(String expression, String expectedString) {
@@ -51,7 +50,7 @@ public class NullEliminatorTest extends CrateDummyClusterServiceUnitTest {
     }
 
     private void assertReplacedAndNormalized(String expression, String expectedString) {
-        EvaluatingNormalizer normalizer = EvaluatingNormalizer.functionOnlyNormalizer(getFunctions());
+        EvaluatingNormalizer normalizer = EvaluatingNormalizer.functionOnlyNormalizer(sqlExpressions.nodeCtx);
         assertReplaced(expression, expectedString,  s -> normalizer.normalize(s, CoordinatorTxnCtx.systemTransactionContext()));
     }
 

@@ -25,6 +25,7 @@ package io.crate.planner.consumer;
 import com.carrotsearch.randomizedtesting.RandomizedTest;
 import io.crate.analyze.TableDefinitions;
 import io.crate.exceptions.UnsupportedFeatureException;
+import io.crate.metadata.NodeContext;
 import io.crate.test.integration.CrateDummyClusterServiceUnitTest;
 import io.crate.testing.SQLExecutor;
 import org.elasticsearch.Version;
@@ -41,11 +42,11 @@ public class InsertFromSubQueryPlannerTest extends CrateDummyClusterServiceUnitT
 
     @Before
     public void prepare() throws IOException {
-        e = buildExecutor(clusterService);
+        e = buildExecutor(clusterService, nodeCtx);
     }
 
-    private static SQLExecutor buildExecutor(ClusterService clusterService) throws IOException {
-        return SQLExecutor.builder(clusterService, 2, RandomizedTest.getRandom(), List.of())
+    private static SQLExecutor buildExecutor(ClusterService clusterService, NodeContext nodeCtx) throws IOException {
+        return SQLExecutor.builder(clusterService, nodeCtx, 2, RandomizedTest.getRandom(), List.of())
             .addTable(TableDefinitions.USER_TABLE_DEFINITION)
             .build();
     }
@@ -55,7 +56,7 @@ public class InsertFromSubQueryPlannerTest extends CrateDummyClusterServiceUnitT
         // Make sure the former initialized cluster service is shutdown
         cleanup();
         this.clusterService = createClusterService(additionalClusterSettings(), Version.V_4_1_0);
-        e = buildExecutor(clusterService);
+        e = buildExecutor(clusterService, nodeCtx);
         expectedException.expect(UnsupportedFeatureException.class);
         expectedException.expectMessage(InsertFromSubQueryPlanner.RETURNING_VERSION_ERROR_MSG);
         e.plan("insert into users (id, name) values (1, 'bob') returning id");
@@ -67,7 +68,7 @@ public class InsertFromSubQueryPlannerTest extends CrateDummyClusterServiceUnitT
         // Make sure the former initialized cluster service is shutdown
         cleanup();
         this.clusterService = createClusterService(additionalClusterSettings(), Version.V_4_1_0);
-        e = buildExecutor(clusterService);
+        e = buildExecutor(clusterService, nodeCtx);
         expectedException.expect(UnsupportedFeatureException.class);
         expectedException.expectMessage(InsertFromSubQueryPlanner.RETURNING_VERSION_ERROR_MSG);
         e.plan("insert into users (id, name) select '1' as id, 'b' as name returning id");
