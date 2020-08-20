@@ -969,7 +969,21 @@ can in fact add any value to an added column of the same name. The first value
 added does not determine what you can add further, like with ``dynamic``
 objects.
 Subcolumn definitions inside an ``ignored`` object will behave the same like on
-every other object type, values are validated and indexed (if not disabled).
+The third option is ``ignored``. Explicitly defined columns within an ``ignored`` object behave the same as those within object columns declared as ``dynamic`` or ``strict``. The columns are indexed unless indexing is explicitly turned off using ``INDEX OFF`` and values inserted are validated. The difference is that with ``ignored``, dynamically added columns do not result in a schema update, and the values won't be indexed. This allows to store values with a mixed type under the same key.
+
+An example::
+
+  cr> CREATE TABLE metrics (
+  ...   id TEXT PRIMARY KEY,
+  ...   payload OBJECT (IGNORED) as (
+  ...     tag TEXT
+  ...   )
+  ... );
+
+  cr> INSERT INTO metrics (id, payload) values ('1', {"tag"='AT', "value"=30}');
+  cr> INSERT INTO metrics (id, payload) values ('2', {"tag": 'AT', "value"='str'});
+
+  cr> SELECT payload FROM metrics ORDER BY id;
 
 An object configured like this will simply accept and return the columns
 inserted into it, but otherwise ignore any undefined subcolumn.
@@ -1421,4 +1435,3 @@ See the table below for a full list of aliases:
 .. _ISO 8601 duration format: https://en.wikipedia.org/wiki/ISO_8601#Durations
 .. _CIDR notation: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing#CIDR_notation
 .. _ISO 8601 time zone designators: https://en.wikipedia.org/wiki/ISO_8601#Time_zone_designators
-
