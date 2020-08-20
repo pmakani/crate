@@ -1007,13 +1007,18 @@ inserted into it, but otherwise ignore any undefined subcolumn.
 .. NOTE::
 
    ``Ignored`` objects should be mainly used for storing and fetching.
-   Filtering by and ordering on any undefined subcolumn is possible but very
-   performance intensive. Undefined subcolumns of ``ignored`` objects are a
-   *black box* for the storage engine, so the filtering/ordering is done using
-   an expensive table scan and a filter/order function outside of the storage
-   engine. Using undefined subcolumns of ``ignored`` objects for grouping or
-   aggregations is not possible and will result in an exception unless explicit
-   casted.
+   Given that dynamically added sub-columns of an ``ignored`` objects are not indexed, filter operations on these columns cannot utilize the index and instead a value lookup is performed for each matching row. This can be mitigated by combining a filter using the ``AND`` clause with other predicates on indexed columns.
+
+   Futhermore, values for dynamically added sub-columns of an ``ignored`` objects aren't stored in a column store, which means that ordering on these columns or using them with aggregates is also slower than using the same operations on regular columns. For some operations it may also be necessary to add an explicit type cast because there is no type information available in the schema. An example::
+
+
+   cr> SELECT arbitrary(payload['value']::text) FROM metrics;
+
+
+Given that it is possible have values of different types within the same sub-column of an ignored objects, aggregations may fail at runtime::
+
+
+   cr> SELECT sum(payload['value']::bigint) FROM metrics;
 
 .. _data-type-object-literals:
 
